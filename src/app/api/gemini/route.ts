@@ -68,6 +68,7 @@ export async function POST(request: NextRequest) {
     
     if (shouldSearch) {
       searchResults = await performWebSearch(latestUserMessage);
+      console.log("Search results:", searchResults);
       usedSearch = searchResults.length > 0;
     }
     
@@ -76,9 +77,12 @@ export async function POST(request: NextRequest) {
     if (usedSearch && searchResults.length > 0) {
       searchContext = `\n\nI found some relevant information from the web that might help answer this question:\n\n`;
       searchResults.forEach((result, index) => {
-        searchContext += `Source ${index + 1}: ${result.title}\nURL: ${result.link}\nInformation: ${result.snippet}\n\n`;
+        searchContext += `Source ${index + 1}: [${result.title}](${result.link})\nInformation: ${result.snippet}\n\n`;
       });
       searchContext += `Use this information to provide a more accurate and up-to-date answer.`;
+      searchContext += `Remember that sometimes the user ask in taglish or tagalog language, so you should also answer in taglish or tagalog language.`;
+    } else {
+      searchContext = `\n\nNo relevant information was found from the web. Please provide an answer based on your knowledge.`;
     }
     
     // System context for the Gemini model
