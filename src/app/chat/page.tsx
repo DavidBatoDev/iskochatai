@@ -162,8 +162,8 @@ export default function ChatPage() {
                         blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-yellow-400 pl-3 italic my-2" {...props} />,
                         code: ({node, inline, ...props}: {node?: any, inline?: boolean, [key: string]: any}) => 
                           inline 
-                            ? <code className="bg-indigo-900 bg-opacity-50 px-1 rounded" {...props} />
-                            : <code className="block bg-indigo-900 bg-opacity-50 p-2 rounded my-2 overflow-x-auto" {...props} />
+                            ? <code className="bg-indigo-900 bg-opacity-50 text-white px-1 rounded" {...props} />
+                            : <code className="block bg-indigo-900 bg-opacity-50 text-white p-2 rounded my-2 overflow-x-auto" {...props} />
                       }}
                     >
                       {message.content}
