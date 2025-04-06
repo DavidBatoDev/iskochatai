@@ -74,7 +74,7 @@ export default function ChatPage() {
       // Check if the response indicates web search was used
       let responseContent = data.response;
       let usedSearch = data.usedSearch || false;
-      let references = data.references || [];
+      const  references = data.references || [];
       
       // If the response starts with [Web Search Used], remove this prefix
       if (responseContent.startsWith('[Web Search Used]')) {
