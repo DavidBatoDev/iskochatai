@@ -1,33 +1,56 @@
 'use client'
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { Send, ArrowLeft, Bot, User, Sparkles, RotateCcw, Copy } from "lucide-react";
+import { Send, ArrowLeft, Bot, User, Sparkles, RotateCcw, Copy, Search, Globe, ExternalLink } from "lucide-react";
 import ReactMarkdown from 'react-markdown';
 
 export default function ChatPage() {
-  const [messages, setMessages] = useState([
+  interface Reference {
+    title?: string;
+    url: string;
+  }
+  
+  interface Message {
+    role: "user" | "assistant";
+    content: string;
+    usedSearch: boolean;
+    references: Reference[];
+  }
+  
+  const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "Hi there! I'm IskoBot you chatbot for a better tomorrow. How can I help with your scholarship and college application questions today?",
+      content: "Hi there! I'm IskoBot, your chatbot for a better tomorrow. How can I help with your scholarship and college application questions today?",
+      usedSearch: false,
+      references: [],
     },
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [webSearchEnabled, setWebSearchEnabled] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Send a message to our API route which calls Gemini
   const handleSendMessage = async () => {
     if (input.trim() === "") return;
 
-    const userMessage = {
+    const userMessage: Message = {
       role: "user",
       content: input,
+      usedSearch: false,
+      references: [],
     };
 
     const newMessages = [...messages, userMessage];
     setMessages(newMessages);
     setInput("");
     setIsLoading(true);
+
+    // Reset textarea height
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "48px";
+    }
 
     try {
       // Call our API route
@@ -36,7 +59,10 @@ export default function ChatPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ messages: newMessages }),
+        body: JSON.stringify({ 
+          messages: newMessages,
+          enableWebSearch: webSearchEnabled 
+        }),
       });
 
       if (!response.ok) {
@@ -45,18 +71,33 @@ export default function ChatPage() {
 
       const data = await response.json();
       
-      const assistantMessage = {
+      // Check if the response indicates web search was used
+      let responseContent = data.response;
+      let usedSearch = data.usedSearch || false;
+      let references = data.references || [];
+      
+      // If the response starts with [Web Search Used], remove this prefix
+      if (responseContent.startsWith('[Web Search Used]')) {
+        responseContent = responseContent.replace('[Web Search Used]', '').trim();
+        usedSearch = true;
+      }
+      
+      const assistantMessage: Message = {
         role: "assistant",
-        content: data.response,
+        content: responseContent,
+        usedSearch: usedSearch,
+        references: references,
       };
 
       setMessages([...newMessages, assistantMessage]);
     } catch (error) {
       console.error("Error calling API:", error);
       
-      const errorMessage = {
+      const errorMessage: Message = {
         role: "assistant",
         content: "I'm having trouble connecting to my knowledge base right now. Please try again in a moment.",
+        usedSearch: false,
+        references: [],
       };
       
       setMessages([...newMessages, errorMessage]);
@@ -64,8 +105,6 @@ export default function ChatPage() {
       setIsLoading(false);
     }
   };
-
-  console.log("process.env.GEMINI_API_KEY", process.env.NEXT_PUBLIC_GEMINI_API_KEY);
 
   // Handle pressing Enter to send message
   const handleKeyDown = (e: { key: string; shiftKey: any; preventDefault: () => void; }) => {
@@ -80,14 +119,59 @@ export default function ChatPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Auto-resize textarea as content grows or shrinks
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+    
+    const adjustHeight = () => {
+      // Reset height to default before calculating the scrollHeight
+      textarea.style.height = "48px";
+      
+      if (textarea.value) {
+        // If there's text, adjust to content height
+        const scrollHeight = textarea.scrollHeight;
+        textarea.style.height = `${scrollHeight}px`;
+      }
+    };
+    
+    // Add event listener for input
+    textarea.addEventListener("input", adjustHeight);
+    
+    // Initial adjustment and adjust when input state changes
+    adjustHeight();
+    
+    // Clean up
+    return () => {
+      textarea.removeEventListener("input", adjustHeight);
+    };
+  }, [input]); // Added input as a dependency to react to its changes
+
   // Reset chat to initial state
   const resetChat = () => {
     setMessages([
       {
         role: "assistant",
         content: "Hi there! I'm IskoBot here to help you in your future. How can I help with your scholarship and college application questions today?",
+        usedSearch: false,
+        references: [],
       },
     ]);
+  };
+
+  // Handle input change
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInput(e.target.value);
+    
+    // When input becomes empty, reset height explicitly
+    if (e.target.value === "" && textareaRef.current) {
+      textareaRef.current.style.height = "48px";
+    }
+  };
+
+  // Toggle web search
+  const toggleWebSearch = () => {
+    setWebSearchEnabled(!webSearchEnabled);
   };
 
   return (
@@ -109,13 +193,15 @@ export default function ChatPage() {
               </span>
             </h1>
           </div>
-          <button 
-            onClick={resetChat}
-            className="text-white hover:text-yellow-300 transition p-2 rounded-full hover:bg-white hover:bg-opacity-10"
-            title="Reset conversation"
-          >
-            <RotateCcw className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={resetChat}
+              className="text-white hover:text-yellow-300 transition p-2 rounded-full hover:bg-white hover:bg-opacity-10"
+              title="Reset conversation"
+            >
+              <RotateCcw className="w-5 h-5" />
+            </button>
+          </div>
         </div>
       </header>
 
@@ -128,42 +214,47 @@ export default function ChatPage() {
               className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
             >
               <div
-                className={`max-w-[80%] rounded-2xl p-4 shadow-md ${
+                className={`max-w-[80%] md:max-w-[80%] sm:max-w-[85%] rounded-2xl p-4 shadow-md ${
                   message.role === "user"
-                    ? "bg-blue-500 text-white rounded-br-none"
-                    : "bg-white bg-opacity-10 backdrop-blur-md text-white rounded-bl-none border border-white border-opacity-20"
+                    ? "bg-blue-500 text-black rounded-br-none"
+                    : "bg-white bg-opacity-10 backdrop-blur-md text-black rounded-bl-none border border-white border-opacity-20"
                 }`}
               >
                 <div className="flex items-center gap-2 mb-2">
                   {message.role === "user" ? (
                     <>
-                      <span className="text-black font-semibold">You</span>
-                      <User className="w-4 h-4" />
+                      <span className="font-semibold text-black">You</span>
+                      <User className="w-4 h-4 text-black" />
                     </>
                   ) : (
                     <>
                       <Bot className="w-4 h-4 text-yellow-400" />
-                      <span className="text-black font-semibold">IskoBot</span>
+                      <span className="font-semibold text-black">IskoBot</span>
+                      {message.usedSearch && (
+                        <span className="flex items-center gap-1 text-xs bg-green-500 text-black px-2 py-0.5 rounded-full">
+                          <Globe className="w-3 h-3" /> Web Search
+                        </span>
+                      )}
                     </>
                   )}
                 </div>
                 {message.role === "assistant" ? (
-                  <div className="markdown-content text-black whitespace-pre-wrap">
+                  <div className="markdown-content items-center text-black whitespace-pre-wrap">
                     <ReactMarkdown
                       components={{
-                        h1: ({node, ...props}) => <h1 className="text-xl font-bold mt-3" {...props} />,
-                        h2: ({node, ...props}) => <h2 className="text-lg font-bold mt-3" {...props} />,
-                        h3: ({node, ...props}) => <h3 className="text-md font-bold mt-2" {...props} />,
-                        p: ({node, ...props}) => <p className="mb-2" {...props} />,
-                        ul: ({node, ...props}) => <ul className="list-disc pl-5" {...props} />,
-                        ol: ({node, ...props}) => <ol className="list-decimal pl-5" {...props} />,
-                        li: ({node, ...props}) => <li className="" {...props} />,
-                        a: ({node, ...props}) => <a className="text-yellow-300 hover:underline" {...props} />,
+                        h1: ({node, ...props}) => <h1 className="text-xl font-bold mt-[-40px]" {...props} />,
+                        h2: ({node, ...props}) => <h2 className="text-lg font-bold mt-[-40px]" {...props} />,
+                        h3: ({node, ...props}) => <h3 className="text-md font-bold mt-[-20px]" {...props} />,
+                        p: ({node, ...props}) => <p className="mb-[-30px]" {...props} />,
+                        ol: ({node, ...props}) => <ol className="list-decimal pl-5 items-center" {...props} />,
+                        ul: ({node, ...props}) => <ul className="list-disc pl-5 items-start" {...props} />,
+                        li: ({node, ...props}) => <li className="align-baseline" {...props} />,
+                        a: ({node, ...props}) => <a target="_blank" className="text-yellow-300 hover:underline" {...props} />,
                         blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-yellow-400 pl-3 italic my-2" {...props} />,
                         code: ({node, inline, ...props}: {node?: any, inline?: boolean, [key: string]: any}) => 
                           inline 
-                            ? <code className="bg-indigo-900 bg-opacity-50 text-white px-1 rounded" {...props} />
-                            : <code className="block bg-indigo-900 bg-opacity-50 text-white p-2 rounded my-2 overflow-x-auto" {...props} />
+                            ? <code className="bg-indigo-900 bg-opacity-50 text-black px-1 rounded" {...props} />
+                            : <code className="block bg-indigo-900 bg-opacity-50 text-black p-2 rounded my-2 overflow-x-auto" {...props} />
                       }}
                     >
                       {message.content}
@@ -173,9 +264,33 @@ export default function ChatPage() {
                   <p className="text-black whitespace-pre-wrap">{message.content}</p>
                 )}
                 
+                {/* References Section */}
+                {message.role === "assistant" && message.usedSearch && message.references && message.references.length > 0 && (
+                  <div className="mt-4 pt-3 border-t border-white border-opacity-20">
+                    <h4 className="text-sm font-semibold text-black mb-2 flex items-center">
+                      <Search className="w-3 h-3 mr-1" /> References
+                    </h4>
+                    <ul className="space-y-2">
+                      {message.references.map((reference, idx) => (
+                        <li key={idx} className="text-xs text-black break-words">
+                          <a 
+                            href={reference.url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="flex items-start hover:text-yellow-300 transition-colors"
+                          >
+                            <ExternalLink className="w-3 h-3 mr-1 mt-0.5 flex-shrink-0" />
+                            <span>{reference.title || reference.url}</span>
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                
                 {message.role === "assistant" && (
                   <button 
-                    className="mt-2 text-blue-200 hover:text-yellow-300 text-xs flex items-center gap-1 transition-colors"
+                    className="mt-3 text-blue-200 hover:text-yellow-300 mt-10 text-xs flex items-center gap-1 transition-colors"
                     onClick={() => navigator.clipboard.writeText(message.content)}
                   >
                     <Copy className="w-3 h-3" /> Copy
@@ -186,10 +301,15 @@ export default function ChatPage() {
           ))}
           {isLoading && (
             <div className="flex justify-start">
-              <div className="bg-white bg-opacity-10 backdrop-blur-md text-white rounded-2xl rounded-bl-none border border-white border-opacity-20 p-4 max-w-[80%]">
+              <div className="bg-white bg-opacity-10 backdrop-blur-md text-black rounded-2xl rounded-bl-none border border-white border-opacity-20 p-4 max-w-[80%]">
                 <div className="flex items-center gap-2 mb-2">
                   <Bot className="w-4 h-4 text-yellow-400" />
-                  <span className="font-semibold">IskoBot</span>
+                  <span className="font-semibold text-black">IskoBot</span>
+                  {webSearchEnabled && (
+                    <span className="flex items-center gap-1 text-xs bg-blue-500 text-black px-2 py-0.5 rounded-full animate-pulse">
+                      <Search className="w-3 h-3" /> Searching...
+                    </span>
+                  )}
                 </div>
                 <div className="flex space-x-2">
                   <div className="w-2 h-2 rounded-full bg-blue-300 animate-bounce" style={{ animationDelay: "0ms" }}></div>
@@ -213,14 +333,54 @@ export default function ChatPage() {
             }}
             className="flex items-center gap-2"
           >
-            <textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Ask about scholarships, applications, deadlines..."
-              className="flex-1 text-black bg-white bg-opacity-10 backdrop-blur-md overflow-hidden rounded-xl border border-white border-opacity-20 p-3 focus:outline-none focus:ring-2 focus:ring-yellow-400 resize-none h-12 max-h-32 placeholder-blue-200"
-              style={{ minHeight: "48px" }}
-            />
+            <div className="flex-1 bg-white rounded-2xl">
+              {/* Text arae */}
+              <textarea
+                ref={textareaRef}
+                value={input}
+                onChange={handleInputChange}
+                onKeyDown={handleKeyDown}
+                placeholder="Ask about scholarships, applications, deadlines..."
+                className="w-full text-black bg-white bg-opacity-10 backdrop-blur-md overflow-hidden rounded-xl border border-white border-opacity-20 p-3 focus:outline-none resize-none min-h-12 max-h-64 placeholder-blue-200"
+                style={{ 
+                  height: "48px", 
+                  transition: "height 0.2s ease"
+                }}
+              />
+
+              {/* Input size */}
+              {input && (
+                <div className="absolute right-3 bottom-3 text-xs text-blue-200">
+                  {input.length} chars
+                </div>
+              )}
+
+              <div className="flex items-center pl-4 mb-3">
+                <label htmlFor="webSearchToggle" className="flex items-center cursor-pointer group">
+                  <div className="relative">
+                    <input 
+                      type="checkbox" 
+                      id="webSearchToggle" 
+                      className="sr-only" 
+                      checked={webSearchEnabled}
+                      onChange={toggleWebSearch}
+                    />
+                    <div className={`block w-14 h-7 rounded-full transition-colors ${webSearchEnabled ? 'bg-yellow-400' : 'bg-gray-600 group-hover:bg-gray-500'}`}>
+                      <div className="flex items-center justify-between px-1.5 h-full text-xs">
+                        <span className={`text-indigo-900 font-medium ${webSearchEnabled ? 'opacity-100' : 'opacity-0'}`}>ON</span>
+                        <span className={`text-white font-medium ${!webSearchEnabled ? 'opacity-100' : 'opacity-0'}`}>OFF</span>
+                      </div>
+                    </div>
+                    <div className={`absolute left-1 top-1 bg-white w-5 h-5 rounded-full shadow-md transition transform ${webSearchEnabled ? 'translate-x-7' : ''} flex items-center justify-center`}>
+                      <Globe className={`w-3 h-3 ${webSearchEnabled ? 'text-yellow-500' : 'text-gray-500'}`} />
+                    </div>
+                  </div>
+                  <div className="ml-2 text-black text-sm flex items-center">
+                    Enable Web Search
+                  </div>
+                </label>
+              </div>
+            </div>
             <button
               type="submit"
               disabled={input.trim() === "" || isLoading}
@@ -228,12 +388,12 @@ export default function ChatPage() {
                 input.trim() === "" || isLoading
                   ? "bg-gray-500 cursor-not-allowed"
                   : "bg-yellow-400 hover:bg-yellow-300 text-indigo-900"
-              } transition duration-200 cursor-pointer`}
+              } transition duration-200 cursor-pointer flex items-center justify-center min-w-12 min-h-12`}
             >
               <Send className="w-5 h-5" />
             </button>
           </form>
-          <p className="text-xs mt-2 text-center text-blue-200">
+          <p className="text-xs mt-2 text-center text-white">
             IskoBot might not have all the answers. Please verify important information from official sources.
           </p>
         </div>
