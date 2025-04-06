@@ -3,8 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
-const GOOGLE_CSE_ID = "e67f4c2c700494a09"; // Your Google Custom Search Engine ID
-const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY; // You'll need to add this to your environment variables
+const GOOGLE_CSE_ID = process.env.GSE_API_KEY; 
+const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY; 
 
 interface SearchResult {
   title: string;
