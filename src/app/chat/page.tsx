@@ -245,10 +245,10 @@ export default function ChatPage() {
                         h1: ({node, ...props}) => <h1 className="text-xl font-bold mt-[-40px]" {...props} />,
                         h2: ({node, ...props}) => <h2 className="text-lg font-bold mt-[-40px]" {...props} />,
                         h3: ({node, ...props}) => <h3 className="text-md font-bold mt-[-20px]" {...props} />,
-                        p: ({node, ...props}) => <p className="mb-[-30px]" {...props} />,
+                        p: ({node, ...props}) => <p className="mb-[-10px]" {...props} />,
                         ol: ({node, ...props}) => <ol className="list-decimal pl-5 items-center" {...props} />,
                         ul: ({node, ...props}) => <ul className="list-disc pl-5 items-start" {...props} />,
-                        li: ({node, ...props}) => <li className="align-baseline" {...props} />,
+                        li: ({node, ...props}) => <li className="align-baseline mt-[-20px]" {...props} />,
                         a: ({node, ...props}) => <a target="_blank" className="text-yellow-300 hover:underline" {...props} />,
                         blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-yellow-400 pl-3 italic my-2" {...props} />,
                         code: ({node, inline, ...props}: {node?: any, inline?: boolean, [key: string]: any}) => 
@@ -290,7 +290,7 @@ export default function ChatPage() {
                 
                 {message.role === "assistant" && (
                   <button 
-                    className="mt-3 text-blue-200 hover:text-yellow-300 mt-10 text-xs flex items-center gap-1 transition-colors"
+                    className="text-blue-200 hover:text-yellow-300 mt-10 text-xs flex items-center gap-1 transition-colors"
                     onClick={() => navigator.clipboard.writeText(message.content)}
                   >
                     <Copy className="w-3 h-3" /> Copy
