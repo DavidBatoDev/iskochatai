@@ -1,36 +1,74 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🎓 IskoChatAI
 
-## Getting Started
+IskoChatAI is your intelligent scholarship companion built for upcoming college students in the Philippines. 🇵🇭
 
-First, run the development server:
+This chatbot, built using Google’s Gemini API and powerful search integrations, speaks native Filipino languages and guides students through every step of their scholarship journey—from finding programs to understanding deadlines, and even assessing which scholarships best suit their personal situation.
+
+## ✨ Features
+
+- 🗣️ **Converses in Filipino languages** – making it feel more natural and accessible for students across the Philippines.
+- 📅 **Guides scholarship applications** – from requirements to deadlines.
+- 🧠 **Smart profile matching** – assesses student profiles and recommends scholarships that match their qualifications.
+- 🔍 **Web search capability** – searches the internet for the latest scholarship news, deadlines, and announcements using Google Custom Search API.
+- 🤖 **Powered by Gemini AI** – intelligent and context-aware responses.
+- ☁️ **Cloud-hosted** – reliable and scalable infrastructure using Google Cloud Platform (GCP).
+
+## 🧑‍💻 Tech Stack
+
+- **Frontend**: [Next.js](https://nextjs.org/) + **TypeScript**
+- **AI Model**: [Gemini API](https://ai.google.dev/)
+- **Search Engine**: [Google Programmable Search Engine](https://programmablesearchengine.google.com/about/) + [Custom Search JSON API](https://developers.google.com/custom-search/v1/overview)
+- **Infrastructure**: [Google Cloud Platform (GCP)](https://cloud.google.com/)
+
+## 🚀 Getting Started
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/DavidBatoDev/iskochatai.git
+cd iskochatai
+```
+
+### 2. Install dependencies
+
+```bash
+npm install
+```
+
+### 3. Set up environment variables
+
+Create a `.env.local` file in the root directory of your project and add the following:
+
+```env
+# Gemini API Key from Google AI Studio
+GEMINI_API_KEY=your_gemini_api_key
+
+# Google Programmable Search Engine
+GOOGLE_SEARCH_API_KEY=your_custom_search_api_key
+GOOGLE_SEARCH_ENGINE_ID=your_programmable_search_engine_id
+```
+
+>  Important: Do not share your .env.local file or commit it to Git. It contains sensitive API keys.
+
+### 4. Run the development server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000` in your browser to see the chatbot in action.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 5. Build for production
 
-## Learn More
+To build the app for production:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run build
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Then, you can start the production server:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run start
+```
