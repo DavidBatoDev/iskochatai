@@ -22,12 +22,12 @@ export default function HeroSection() {
 
         {/* Action buttons */}
         <div className="flex flex-col sm:flex-row gap-3 md:gap-4 mt-4 md:mt-6 w-full max-w-md mx-auto px-4 sm:px-0">
-          <Link href="/get-started" className="w-full">
+          {/* <Link href="/get-started" className="w-full">
             <button className="w-full bg-yellow-400 text-gray-900 px-4 sm:px-6 md:px-8 py-3 md:py-4 rounded-full text-base md:text-lg font-semibold hover:bg-yellow-300 hover:scale-105 transition duration-300 shadow-lg flex items-center justify-center gap-2">
               <span className="whitespace-nowrap">Import Profile</span>
               <ArrowRight className="w-4 h-4 md:w-5 md:h-5" />
             </button>
-          </Link>
+          </Link> */}
 
           <Link href="/chat" className="w-full">
             <button className="w-full bg-white text-slate-900 bg-opacity-20 backdrop-blur-lg border border-white border-opacity-20 px-4 sm:px-6 md:px-8 py-3 md:py-4 rounded-full text-base md:text-lg font-semibold hover:bg-opacity-30 hover:scale-105 transition duration-300 shadow-lg flex items-center justify-center gap-2">
