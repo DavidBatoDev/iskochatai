@@ -7,7 +7,7 @@ This chatbot, built using Google’s Gemini API and powerful search integrations
 ## Demo
 https://scholarship-helper.vercel.app/
 
-> Note: All the faqs is currently being compiled and is under review to ensure accurate data for upcoming college students
+> Note: All the faqs is currently being compiled and is under review to ensure accurate data for upcoming college students, The import profile functionality is under construction to regulates Data Privacy
 
 ## ✨ Features
 
