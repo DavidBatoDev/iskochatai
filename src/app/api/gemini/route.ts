@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
     // Determine if this query might benefit from web search
     // Simple heuristic: if the message contains keywords related to scholarships, deadlines, or programs
     const searchKeywords = ["scholarship", "application", "deadline", "requirement", "program", "college", 
-                           "university", "admission", "kada", "kailan", "paano", "saan", "tuition", "financial aid"];
+                           "university", "admission", "kada", "kailan", "keylan", "ano", "pano", "paano", "saan", "tuition", "financial aid"];
     
     const shouldSearch = enableWebSearch && searchKeywords.some(keyword => 
       latestUserMessage.toLowerCase().includes(keyword.toLowerCase())
