@@ -4,6 +4,11 @@ IskoChatAI is your intelligent scholarship companion built for upcoming college 
 
 This chatbot, built using Google’s Gemini API and powerful search integrations, speaks native Filipino languages and guides students through every step of their scholarship journey—from finding programs to understanding deadlines, and even assessing which scholarships best suit their personal situation.
 
+## Demo
+https://scholarship-helper.vercel.app/
+
+> Note: All the faqs is currently being compiled and is under review to ensure accurate data for upcoming college students
+
 ## ✨ Features
 
 - 🗣️ **Converses in Filipino languages** – making it feel more natural and accessible for students across the Philippines.
