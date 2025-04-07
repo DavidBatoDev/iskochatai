@@ -137,7 +137,11 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ 
       response: responseText,
-      usedSearch: usedSearch
+      usedSearch: usedSearch,
+      references: usedSearch ? searchResults.map(result => ({
+        title: result.title,
+        url: result.link
+      })) : []
     });
   } catch (error: any) {
     console.error("Error in Gemini API route:", error);
