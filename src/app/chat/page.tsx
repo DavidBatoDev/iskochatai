@@ -277,7 +277,7 @@ export default function ChatPage() {
                             href={reference.url} 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="flex items-start hover:text-yellow-300 transition-colors"
+                            className="flex items-start text-blue-500 hover:text-yellow-300 transition-colors"
                           >
                             <ExternalLink className="w-3 h-3 mr-1 mt-0.5 flex-shrink-0" />
                             <span>{reference.title || reference.url}</span>
