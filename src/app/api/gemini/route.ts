@@ -14,9 +14,11 @@ interface SearchResult {
 
 // Function to perform web search using Google Custom Search
 async function performWebSearch(query: string): Promise<SearchResult[]> {
+  const enhancedQuery = `${query} philippines scholarship`;
+  
   try {
     const response = await fetch(
-      `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_API_KEY}&cx=${GOOGLE_CSE_ID}&q=${encodeURIComponent(query)}`
+      `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_API_KEY}&cx=${GOOGLE_CSE_ID}&q=${encodeURIComponent(enhancedQuery)}&cr=countryPH&gl=ph`
     );
     
     if (!response.ok) {
