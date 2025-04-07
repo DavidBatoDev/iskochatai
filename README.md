@@ -78,19 +78,3 @@ Then, you can start the production server:
 npm run start
 ```
 
-
-## 📜 License
-
-This project is licensed under the [MIT License](LICENSE).
-
-### License Summary
-
-The MIT License is a permissive free software license that allows users to:
-
-- **Use** the software for any purpose
-- **Modify** the software
-- **Distribute** the software and its modifications
-
-However, it comes with a disclaimer that the software is provided "as-is," without warranty of any kind.
-
-For more details, please refer to the full [LICENSE](LICENSE) file.
