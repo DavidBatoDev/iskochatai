@@ -290,7 +290,7 @@ export default function ChatPage() {
                 
                 {message.role === "assistant" && (
                   <button 
-                    className="text-blue-200 hover:text-yellow-300 mt-10 text-xs flex items-center gap-1 transition-colors"
+                    className="text-blue-200 hover:text-yellow-300 mt-10 text-xs flex items-center gap-1 transition-colors cursor-pointer"
                     onClick={() => navigator.clipboard.writeText(message.content)}
                   >
                     <Copy className="w-3 h-3" /> Copy
