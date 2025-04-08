@@ -1,6 +1,11 @@
 import React from "react";
 import Link from "next/link";
 import { ArrowRight, MessageCircle } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default function HeroSection() {
   return (
@@ -30,10 +35,19 @@ export default function HeroSection() {
           </Link> */}
 
           <Link href="/chat" className="w-full">
-            <button className="w-full bg-white text-slate-900 bg-opacity-20 backdrop-blur-lg border border-white border-opacity-20 px-4 sm:px-6 md:px-8 py-3 md:py-4 rounded-full text-base md:text-lg font-semibold hover:bg-opacity-30 hover:scale-105 transition duration-300 shadow-lg flex items-center justify-center gap-2 cursor-pointer">
-              <span className="whitespace-nowrap">Chat with IskoBot</span>
-              <MessageCircle className="w-4 h-4 md:w-5 md:h-5" />
-            </button>
+
+              <Tooltip delayDuration={700}>
+                <TooltipTrigger asChild className="w-full">
+                  <button className="w-full bg-white text-slate-900 bg-opacity-20 backdrop-blur-lg border border-white border-opacity-20 px-4 sm:px-6 md:px-8 py-3 md:py-4 rounded-full text-base md:text-lg font-semibold hover:bg-opacity-30 hover:scale-105 transition duration-300 shadow-lg flex items-center justify-center gap-2 cursor-pointer">
+                    <span className="whitespace-nowrap">Chat with IskoBot</span>
+                    <MessageCircle className="w-4 h-4 md:w-5 md:h-5" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent className="bg-white p-2 rounded-md shadow-lg">
+                  Chat!
+                </TooltipContent>
+              </Tooltip>
+
           </Link>
         </div>
       </div>
