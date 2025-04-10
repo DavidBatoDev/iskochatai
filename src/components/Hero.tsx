@@ -37,7 +37,11 @@ const Hero = () => {
                   Chat with Isko Now
                 </Button>
               </Link>
-              <Button variant="outline" size="lg">
+              <Button
+                variant="outline"
+                className="bg-white/10 text-white border-white/20 hover:bg-white/20 transition-transform duration-300 ease-in-out hover:scale-105"
+                size="lg"
+              >
                 <Search className="w-5 h-5 mr-2" />
                 Explore Scholarships
               </Button>
