@@ -61,9 +61,39 @@ export async function POST(request: NextRequest) {
       userMessages[userMessages.length - 1].content : "";
     
     // Determine if this query might benefit from web search
-    // Simple heuristic: if the message contains keywords related to scholarships, deadlines, or programs
-    const searchKeywords = ["search", "sumearch", "magsearch", "mag-search", "humanap", "hanap", "hanapan", "scholarship", "application", "deadline", "requirement", "program", "college", 
-                           "university", "admission", "kada", "kailan", "keylan", "ano", "pano", "paano", "saan", "tuition", "financial aid"];
+    // Simple heuristic: if the message contains keywords related to scholarships, academic programs, or careers
+    const searchKeywords = [
+      // Existing Keywords
+      "search", "sumearch", "magsearch", "mag-search", "humanap", "hanap", "hanapan", 
+      "scholarship", "application", "deadline", "requirement", "program", "college", 
+      "university", "admission", "kada", "kailan", "keylan", "ano", "pano", "paano", "saan", 
+      "tuition", "financial aid",
+
+      // Additional Academic/Scholarship Keywords (English)
+      "apply", "apply now", "eligibility", "qualification", "qualifications", "due date", 
+      "scholarships", "enroll", "enrollment", "major", "course", "degree", "bachelor", "master", 
+      "PhD", "institute", "academic", "education", "study", "exam", "test", "merit", "grant", 
+      "award", "fellowship", "stipend", "scholastic", "credentials", "certificate", "transcript",
+
+      // Additional Academic/Scholarship Keywords (Tagalog)
+      "aplay", "aplikasyon", "kwalipikasyon", "mga kwalipikasyon", "takdang panahon", 
+      "huling araw", "iskolarship", "magparehistro", "rekrut", "pagtanggap", "pagtanggap sa", 
+      "paaralan", "kolehiyo", "unibersidad", "mag-aral", "estudyante", "pampaaralan", 
+      "pang-edukasyon", "kurso", "diploma", "eksamen", "pagsusulit", "marka",
+
+      // Career-Oriented Keywords (English)
+      "career", "careers", "job", "jobs", "employment", "profession", "professional", "occupation",
+      "opportunity", "opportunities", "internship", "work", "employment opportunities", 
+      "engineering", "technology", "IT", "information technology", "finance", "business", 
+      "marketing", "management", "science", "healthcare", "medical", "law", "architecture",
+
+      // Career-Oriented Keywords (Tagalog)
+      "karera", "trabaho", "oportunidad", "pagkakataon", "propesyon", "pagsasanay", "praktis", 
+      "inhenyeriya", "teknolohiya", "IT", "impormasyon teknolohiya", "pinansya", "negosyo", 
+      "merkado", "pamamahala", "agham", "kalusugan", "medisina", "batas", "arkitektura", 
+      "balak"
+    ];
+
     
     const shouldSearch = enableWebSearch && searchKeywords.some(keyword => 
       latestUserMessage.toLowerCase().includes(keyword.toLowerCase())
