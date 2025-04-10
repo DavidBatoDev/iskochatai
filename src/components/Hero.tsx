@@ -42,7 +42,7 @@ const Hero = () => {
                 </div>
               </div>
               <div className="bg-white/10 p-4 rounded-lg rounded-bl-none mb-4">
-                <p className="text-white">Kamusta! I'm IskoChatAI. How can I help you with scholarships today?</p>
+                <p className="text-white">Kamusta! I&apos;m IskoChatAI. How can I help you with scholarships today?</p>
               </div>
               <div className="bg-white/90 p-4 rounded-lg rounded-br-none mb-4 ml-auto max-w-[80%]">
                 <p className="text-primary">Anong mga Scholarship ang goods para sa mga engineering?</p>
