@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "motion/react";
+import { motion } from "framer-motion";
 import {
   ComponentPropsWithoutRef,
   useCallback,
@@ -35,7 +35,7 @@ export function AnimatedGridPattern({
   className,
   maxOpacity = 0.5,
   duration = 4,
-  // repeatDelay, // Removed to avoid unused warning
+  repeatDelay, // Removed to avoid unused warning
   ...props
 }: AnimatedGridPatternProps) {
   const id = useId();
