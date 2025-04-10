@@ -6,7 +6,7 @@ import Link from 'next/link';
 
 const Navbar = () => {
   return (
-    <nav className="bg-white shadow-sm sticky top-0 z-50">
+    <nav className="bg-white shadow-sm sticky top-0 z-50 h-[72px]">
       <div className="isko-container py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
