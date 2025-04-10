@@ -32,19 +32,12 @@ const Hero = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link href={"/chat"}>
-                <Button
-                  className="isko-button-secondary cursor-ponter hover:scale-3d"
-                  size="lg"
-                >
+                <Button size="lg">
                   <MessageCircle className="w-5 h-5 mr-2" />
                   Chat with Isko Now
                 </Button>
               </Link>
-              <Button
-                variant="outline"
-                className="bg-white/10 text-white border-white/20 hover:bg-white/20"
-                size="lg"
-              >
+              <Button variant="outline" size="lg">
                 <Search className="w-5 h-5 mr-2" />
                 Explore Scholarships
               </Button>

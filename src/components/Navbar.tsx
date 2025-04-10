@@ -18,7 +18,7 @@ const Navbar = () => {
             <a href="#faqs" className="text-gray-700 hover:text-primary transition-colors">FAQs</a>
           </div>
           <Link href={'/chat'} className="hidden md:block">
-            <Button className="bg-primary cursor-pointer hover:bg-isko-blue-dark text-white">
+            <Button className="cursor-pointer  text-white">
               <MessageCircle className="w-4 h-4 mr-2" />
               Chat with Isko
             </Button>   
