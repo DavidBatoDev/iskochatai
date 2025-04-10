@@ -35,14 +35,14 @@ export function AnimatedGridPattern({
   className,
   maxOpacity = 0.5,
   duration = 4,
-  repeatDelay, // Removed to avoid unused warning
+  repeatDelay = 0, // Give it a default value to avoid unused warning
   ...props
 }: AnimatedGridPatternProps) {
   const id = useId();
   const containerRef = useRef<SVGSVGElement>(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
-  const [squares, setSquares] = useState(() => generateSquares(numSquares));
 
+  // Define getPos function before it's used
   const getPos = useCallback(() => {
     return [
       Math.floor((Math.random() * dimensions.width) / width),
@@ -50,7 +50,7 @@ export function AnimatedGridPattern({
     ];
   }, [dimensions, width, height]);
 
-  // Wrap generateSquares in useCallback to avoid missing dependency warnings
+  // Define generateSquares before it's used
   const generateSquares = useCallback(
     (count: number) => {
       return Array.from({ length: count }, (_, i) => ({
@@ -60,6 +60,9 @@ export function AnimatedGridPattern({
     },
     [getPos],
   );
+
+  // Now use the function after it's defined
+  const [squares, setSquares] = useState(() => generateSquares(numSquares));
 
   // Function to update a single square's position
   const updateSquarePosition = (id: number) => {
