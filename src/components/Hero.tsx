@@ -3,11 +3,24 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { MessageCircle, Search } from 'lucide-react';
 import Link from 'next/link';
+import { AnimatedGridPattern } from './magicui/animated-grid-pattern';
+import { cn } from '@/lib/utils';
+
 
 const Hero = () => {
   return (
     <section className="relative overflow-hidden bg-gradient-to-r from-blue-600 to-indigo-800 py-20 md:py-32">
-      <div className="isko-container">
+      <AnimatedGridPattern
+        numSquares={70}
+        maxOpacity={0.1}
+        duration={3}
+        repeatDelay={1}
+        className={cn(
+          "[mask-image:radial-gradient(2000px_circle_at_center,white,transparent)]",
+          "inset-0 h-full w-full absolute"
+        )}
+      />
+      <div className="isko-container relative">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <div className="text-white animate-fade-up">
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
