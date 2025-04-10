@@ -200,7 +200,7 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-primary">
+    <div className="flex flex-col h-screen bg-gradient-to-r from-blue-600 to-indigo-800">
       {/* Header */}
       <header className="bg-white bg-opacity-70 backdrop-blur-md shadow-md">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
