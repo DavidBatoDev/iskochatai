@@ -2,6 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { MessageCircle } from 'lucide-react';
+import Link from 'next/link';
 
 const Navbar = () => {
   return (
@@ -16,10 +17,12 @@ const Navbar = () => {
             <a href="#scholarships" className="text-gray-700 hover:text-primary transition-colors">Scholarships</a>
             <a href="#faqs" className="text-gray-700 hover:text-primary transition-colors">FAQs</a>
           </div>
-          <Button className="bg-primary hover:bg-isko-blue-dark text-white">
-            <MessageCircle className="w-4 h-4 mr-2" />
-            Chat with Isko
-          </Button>
+          <Link href={'/chat'} className="hidden md:block">
+            <Button className="bg-primary cursor-pointer hover:bg-isko-blue-dark text-white">
+              <MessageCircle className="w-4 h-4 mr-2" />
+              Chat with Isko
+            </Button>   
+          </Link>
         </div>
       </div>
     </nav>
