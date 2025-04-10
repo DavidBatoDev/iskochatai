@@ -37,7 +37,7 @@ export default function ChatPage() {
     {
       role: "assistant",
       content:
-        "Hi there! I'm IskoBot, your chatbot for a better tomorrow. How can I help with your scholarship and college application questions today?",
+        "Hello Isko/Iska! I'm IskoBotAI, your chatbot para sa magandang kinabukasan. How can I help with your scholarship and college application questions today?",
       usedSearch: false,
       references: [],
     },
@@ -177,7 +177,7 @@ export default function ChatPage() {
       {
         role: "assistant",
         content:
-          "Hi there! I'm IskoBot here to help you in your future. How can I help with your scholarship and college application questions today?",
+        "Hello Isko/Iska! I'm IskoBotAI, your chatbot para sa magandang kinabukasan. How can I help with your scholarship and college application questions today?",
         usedSearch: false,
         references: [],
       },
