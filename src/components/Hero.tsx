@@ -2,6 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { MessageCircle, Search } from 'lucide-react';
+import Link from 'next/link';
 
 const Hero = () => {
   return (
@@ -16,10 +17,12 @@ const Hero = () => {
               Get instant answers, find the right programs, and never miss a deadline. Your academic journey begins here!
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button className="isko-button-secondary" size="lg">
-                <MessageCircle className="w-5 h-5 mr-2" />
-                Chat with Isko Now
-              </Button>
+              <Link href={'/chat'}>
+                <Button className="isko-button-secondary cursor-ponter hover:scale-3d" size="lg">
+                  <MessageCircle className="w-5 h-5 mr-2" />
+                  Chat with Isko Now
+                </Button>
+              </Link>
               <Button variant="outline" className="bg-white/10 text-white border-white/20 hover:bg-white/20" size="lg">
                 <Search className="w-5 h-5 mr-2" />
                 Explore Scholarships
@@ -38,13 +41,13 @@ const Hero = () => {
                   <p className="text-white/70">Your scholarship assistant</p>
                 </div>
               </div>
-              <div className="bg-white/10 p-4 rounded-lg mb-4">
+              <div className="bg-white/10 p-4 rounded-lg rounded-bl-none mb-4">
                 <p className="text-white">Kamusta! I'm IskoChatAI. How can I help you with scholarships today?</p>
               </div>
-              <div className="bg-white/90 p-4 rounded-lg mb-4 ml-auto max-w-[80%]">
+              <div className="bg-white/90 p-4 rounded-lg rounded-br-none mb-4 ml-auto max-w-[80%]">
                 <p className="text-primary">Anong mga Scholarship ang goods para sa mga engineering?</p>
               </div>
-              <div className="bg-white/10 p-4 rounded-lg">
+              <div className="bg-white/10 p-4 rounded-lg rounded-bl-none">
                 <p className="text-white">Great question! Para sa mga engineering students, here are some top options:</p>
                 <ul className="list-disc pl-5 mt-2 text-white/90">
                   <li>DOST-SEI Engineering Scholarship</li>
