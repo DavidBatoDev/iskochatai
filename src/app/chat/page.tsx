@@ -348,12 +348,12 @@ export default function ChatPage() {
                         }) =>
                           inline ? (
                             <code
-                              className="bg-indigo-900 bg-opacity-50 text-black px-1 rounded"
+                              className="bg-indigo-900 bg-opacity-50 text-white px-1 rounded"
                               {...props}
                             />
                           ) : (
                             <code
-                              className="block bg-indigo-900 bg-opacity-50 text-black p-2 rounded my-2 overflow-x-auto"
+                              className="block bg-indigo-900 bg-opacity-50 text-white p-2 rounded my-2 overflow-x-auto"
                               {...props}
                             />
                           ),
@@ -374,8 +374,8 @@ export default function ChatPage() {
                   message.references &&
                   message.references.length > 0 && (
                     <div className="mt-4 pt-3 border-t border-white border-opacity-20">
-                      <h4 className="text-sm font-semibold text-black mb-2 flex items-center">
-                        <Search className="w-3 h-3 mr-1" /> References
+                      <h4 className="text-sm font-semibold text-secondary mb-2 flex items-center">
+                        <Search className="w-3 h-3 mr-1 text-secondary" /> References
                       </h4>
                       <ul className="space-y-2">
                         {message.references.map((reference, idx) => (
@@ -387,7 +387,7 @@ export default function ChatPage() {
                               href={reference.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="flex items-start text-blue-500 hover:text-yellow-300 transition-colors"
+                              className="flex items-start text-blue-200 hover:text-yellow-300 transition-colors"
                             >
                               <ExternalLink className="w-3 h-3 mr-1 mt-0.5 flex-shrink-0" />
                               <span>{reference.title || reference.url}</span>
