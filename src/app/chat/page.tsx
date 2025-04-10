@@ -200,27 +200,29 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gradient-to-br from-blue-600 to-indigo-900">
+    <div className="flex flex-col h-screen bg-primary">
       {/* Header */}
-      <header className="bg-indigo-800 bg-opacity-70 backdrop-blur-md shadow-md">
+      <header className="bg-white bg-opacity-70 backdrop-blur-md shadow-md">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-2">
             <Link href="/">
               <Tooltip delayDuration={700}>
                 <TooltipTrigger asChild>
-                  <button className="text-white cursor-pointer hover:text-yellow-300 transition p-2 rounded-full hover:bg-white hover:bg-opacity-10">
+                  <button className="text-primary cursor-pointer hover:text-yellow-300 transition p-2 rounded-full hover:bg-white hover:bg-opacity-10">
                     <ArrowLeft className="w-5 h-5" />
                   </button>
                 </TooltipTrigger>
-                <TooltipContent className="bg-white p-2 rounded-md shadow-lg">
+                <TooltipContent className="bg-primary p-2 rounded-md shadow-lg">
                   Back to Home
                 </TooltipContent>
               </Tooltip>
             </Link>
-            <h1 className="text-xl font-bold text-white flex items-center gap-2">
-              <Bot className="w-6 h-6 text-yellow-400" />
-              IskoChat
-              <span className="text-xs bg-yellow-400 text-indigo-900 px-2 py-1 rounded-full font-medium ml-2 flex items-center">
+            <h1 className="text-xl font-bold text-primary flex items-center gap-2">
+              <Bot className="w-6 h-6 text-secondary" />
+              <div>
+                Isko<span className="text-secondary">Chat</span>Ai
+              </div>
+              <span className="text-xs bg-secondary text-indigo-900 px-2 py-1 rounded-full font-medium ml-2 flex items-center">
                 <Sparkles className="w-3 h-3 mr-1" /> TechnoQuatro
               </span>
             </h1>
@@ -230,7 +232,7 @@ export default function ChatPage() {
               <TooltipTrigger asChild>
                 <button
                   onClick={resetChat}
-                  className="text-white cursor-pointer hover:text-yellow-300 transition p-2 rounded-full hover:bg-white hover:bg-opacity-10"
+                  className="text-black cursor-pointer hover:text-yellow-300 transition p-2 rounded-full hover:bg-white hover:bg-opacity-10"
                 >
                   <RotateCcw className="w-5 h-5" />
                 </button>
@@ -257,8 +259,8 @@ export default function ChatPage() {
               <div
                 className={`max-w-[80%] md:max-w-[80%] sm:max-w-[85%] rounded-2xl p-4 shadow-md ${
                   message.role === "user"
-                    ? "bg-blue-500 text-black rounded-br-none"
-                    : "bg-white bg-opacity-10 backdrop-blur-md text-black rounded-bl-none border border-white border-opacity-20"
+                    ? "bg-white text-black rounded-br-none"
+                    : "bg-blue-500 bg-opacity-10 backdrop-blur-md text-black rounded-bl-none border border-white border-opacity-20"
                 }`}
               >
                 <div className="flex items-center gap-2 mb-2">
@@ -270,7 +272,7 @@ export default function ChatPage() {
                   ) : (
                     <>
                       <Bot className="w-4 h-4 text-yellow-400" />
-                      <span className="font-semibold text-black">IskoBot</span>
+                      <span className="font-semibold text-white">IskoBot</span>
                       {message.usedSearch && (
                         <span className="flex items-center gap-1 text-xs bg-green-500 text-black px-2 py-0.5 rounded-full">
                           <Globe className="w-3 h-3" /> Web Search
@@ -280,7 +282,7 @@ export default function ChatPage() {
                   )}
                 </div>
                 {message.role === "assistant" ? (
-                  <div className="markdown-content items-center text-black whitespace-pre-wrap">
+                  <div className="markdown-content items-center text-white whitespace-pre-wrap">
                     <ReactMarkdown
                       components={{
                         h1: ({ node, ...props }) => (
@@ -443,7 +445,7 @@ export default function ChatPage() {
       </div>
 
       {/* Input Area */}
-      <div className="bg-indigo-800 bg-opacity-70 backdrop-blur-md border-t border-white border-opacity-10 p-4">
+      <div className="bg-trasparent bg-opacity-70 backdrop-blur-md p-4">
         <div className="max-w-3xl mx-auto">
           <form
             onSubmit={(e) => {
