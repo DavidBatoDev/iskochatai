@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
     
     // Determine if this query might benefit from web search
     // Simple heuristic: if the message contains keywords related to scholarships, deadlines, or programs
-    const searchKeywords = ["scholarship", "application", "deadline", "requirement", "program", "college", 
+    const searchKeywords = ["search", "sumearch", "magsearch", "mag-search", "humanap", "hanap", "hanapan", "scholarship", "application", "deadline", "requirement", "program", "college", 
                            "university", "admission", "kada", "kailan", "keylan", "ano", "pano", "paano", "saan", "tuition", "financial aid"];
     
     const shouldSearch = enableWebSearch && searchKeywords.some(keyword => 
@@ -99,6 +99,7 @@ export async function POST(request: NextRequest) {
     Do not provide any personal opinions or unverified information.
     If the user asks about a specific scholarship, provide details about it, including eligibility criteria, application process, and deadlines.
     If they ask about something that is not related to scholarships, politely redirect them to the topic of scholarships.
+    if they ask you to search online and you can't just say "There's something wrong with my search engine, please try again later."
     ${searchContext}
     
     ${usedSearch ? "IMPORTANT: Begin your response with '[Web Search Used]' and then continue with your answer." : ""}`;
