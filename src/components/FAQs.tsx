@@ -41,11 +41,11 @@ const FAQs = () => {
           </p>
         </div>
         
-        <div className="max-w-3xl mx-auto">
-          <Accordion type="single" collapsible className="bg-white rounded-xl shadow-md">
+        <div className="max-w-3xl mx-auto ">
+          <Accordion type="single" collapsible className="bg-white rounded-xl shadow-md ">
             {faqs.map((faq, index) => (
               <AccordionItem key={index} value={`item-${index}`}>
-                <AccordionTrigger className="px-6 text-left font-medium">
+                <AccordionTrigger className="px-6 text-left font-medium cursor-pointer">
                   {faq.question}
                 </AccordionTrigger>
                 <AccordionContent className="px-6 pb-4 text-gray-600">
