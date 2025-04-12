@@ -18,8 +18,8 @@ const CTA = () => {
         squares={[45, 45]}
         squaresClassName="hover:fill-blue-500 transition-colors duration-300 ease-in-out will-change-opacity"
       />
-      <div className="isko-container relative">
-        <div className="max-w-4xl mx-auto text-center text-white">
+
+        <div className="flex relative flex-col justify-center items-center text-center text-white p-5 sm:p-0">
           <h2 className="text-3xl md:text-4xl font-bold mb-6">
             Ready to Find Your Perfect Scholarship?
           </h2>
@@ -46,7 +46,7 @@ const CTA = () => {
             </Link>
           </div>
         </div>
-      </div>
+
     </section>
   );
 };
