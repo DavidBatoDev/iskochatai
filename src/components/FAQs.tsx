@@ -27,7 +27,36 @@ const faqs = [
   {
     question: "What if a scholarship isn't listed?",
     answer: "While we continuously expand our database, there might be some scholarships that aren't listed yet. If you know of a scholarship that's not in our system, please let us know through our feedback form, and we'll look into adding it. You can also ask IskoChatAI about it – we might have some information even if it's not featured prominently."
-  }
+  },
+  {
+    question: "How can I know which scholarships I'm eligible for?",
+    answer: "IskoChatAI can help filter scholarships based on your academic background, field of study, location, and other criteria. Simply ask about scholarships for your specific situation, and our AI will suggest opportunities you're likely eligible for. You can ask questions like 'What scholarships are available for engineering students in Manila?' or 'What scholarships can I apply for as a HUMSS student?'"
+  },
+  {
+    question: "Can I get notified about new scholarship opportunities?",
+    answer: "Currently, we don't offer automatic notifications, but we regularly update our database with new scholarships. We recommend checking back frequently or following our social media channels where we announce major scholarship opportunities. We're working on adding a notification feature in the future."
+  },
+    {
+    question: "How is my chat data handled?",
+    answer: "We prioritize your privacy. Chat conversations are used only to improve the quality of our responses and are not shared with third parties. We don't store personally identifiable information unless explicitly provided, and you can request deletion of your chat history at any time."
+  },
+  {
+    question: "What should I do if IskoChatAI isn't working correctly?",
+    answer: "If you encounter any technical issues, try refreshing your browser first. If problems persist, you can report the issue through our feedback form with details about what happened. Our team regularly monitors these reports and works to resolve issues quickly."
+  },
+  {
+    question: "Can IskoChatAI help me with my scholarship application?",
+    answer: "Absolutely! You can ask for guidance on writing scholarship essays, preparing for interviews, gathering required documents, and other aspects of the application process. While we provide general advice, we encourage you to personalize our suggestions to reflect your unique experiences and qualifications."
+  },
+  
+  {
+    question: "How can I provide feedback about IskoChatAI?",
+    answer: "We welcome your feedback! You can share your thoughts, suggestions, or any issues you encounter through our feedback form. Your input helps us improve the platform and provide a better experience for all users."
+  },
+  {
+    question: "Is there a mobile app for IskoChatAI?",
+    answer: "Currently, IskoChatAI is available as a web application. We are exploring the possibility of developing a mobile app in the future to enhance accessibility. For now, you can access IskoChatAI through any mobile browser."
+  },
 ];
 
 const FAQs = () => {
@@ -41,11 +70,11 @@ const FAQs = () => {
           </p>
         </div>
         
-        <div className="max-w-3xl mx-auto">
-          <Accordion type="single" collapsible className="bg-white rounded-xl shadow-md">
+        <div className="max-w-3xl mx-auto ">
+          <Accordion type="single" collapsible className="bg-white rounded-xl shadow-md ">
             {faqs.map((faq, index) => (
               <AccordionItem key={index} value={`item-${index}`}>
-                <AccordionTrigger className="px-6 text-left font-medium">
+                <AccordionTrigger className="px-6 text-left font-medium cursor-pointer">
                   {faq.question}
                 </AccordionTrigger>
                 <AccordionContent className="px-6 pb-4 text-gray-600">
