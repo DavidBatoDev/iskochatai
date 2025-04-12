@@ -13,7 +13,7 @@ const Hero = () => {
   const [showAiResponse, setShowAiResponse] = useState(false);
 
   return (
-    <section className="min-h-[calc(100vh-72px)] flex flex-col justify-center items-center relative overflow-hidden bg-gradient-to-r from-blue-600 to-indigo-800 py-4">
+    <section className="min-h-[calc(100vh-72px)] flex flex-col justify-center items-center relative overflow-hidden bg-gradient-to-r from-blue-600 to-indigo-800 py-10 px-5">
       <AnimatedGridPattern
         numSquares={70}
         maxOpacity={0.1}
@@ -36,16 +36,16 @@ const Hero = () => {
               Get instant answers, find the right programs, and never miss a
               deadline. Your academic journey begins here!
             </p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link href={"/chat"}>
-                <Button size="lg">
+            <div className="flex flex-col sm:flex-row flex-wrap gap-4">
+              <Link href={"/chat"} className="w-full sm:w-auto">
+                <Button size="lg" className="w-full">
                   <MessageCircle className="w-5 h-5 mr-2" />
                   Chat with Isko Now
                 </Button>
               </Link>
               <Button
                 variant="outline"
-                className="bg-white/10 text-white border-white/20 hover:bg-white/20 transition-transform duration-300 ease-in-out hover:scale-105"
+                className="bg-white/10 text-white border-white/20 hover:bg-white/20 transition-transform duration-300 ease-in-out hover:scale-105 w-full sm:w-auto"
                 size="lg"
               >
                 <Search className="w-5 h-5 mr-2" />
