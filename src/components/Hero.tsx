@@ -1,13 +1,19 @@
-import React from "react";
+"use client";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { MessageCircle, Search } from "lucide-react";
 import Link from "next/link";
 import { AnimatedGridPattern } from "./magicui/animated-grid-pattern";
 import { cn } from "@/lib/utils";
+import { TypeAnimation } from "react-type-animation";
 
 const Hero = () => {
+  // State to control message visibility
+  const [showUserMessage, setShowUserMessage] = useState(false);
+  const [showAiResponse, setShowAiResponse] = useState(false);
+
   return (
-    <section className="min-h-[calc(100vh-72px)] flex flex-col justify-center items-center relative overflow-hidden bg-gradient-to-r from-blue-600 to-indigo-800 py-20 md:py-32">
+    <section className="h-[calc(100vh-72px)] flex flex-col justify-center items-center relative overflow-hidden bg-gradient-to-r from-blue-600 to-indigo-800 py-20 md:py-32">
       <AnimatedGridPattern
         numSquares={70}
         maxOpacity={0.1}
@@ -61,31 +67,56 @@ const Hero = () => {
                   <p className="text-white/70">Your scholarship assistant</p>
                 </div>
               </div>
-              <div className="bg-white/10 p-4 rounded-lg rounded-bl-none mb-4">
-                <p className="text-white">
-                  Kamusta! I&apos;m IskoChatAI. How can I help you with
-                  scholarships today?
-                </p>
+
+              {/* AI Initial Message */}
+              <div className="bg-white/10 p-3 rounded-lg rounded-bl-none mb-4 mr-auto max-w-[90%]">
+                <TypeAnimation
+                  sequence={[
+                    0,
+                    "Kamusta! I'm IskoChatAI. How can I help you with scholarships today?",
+                    1000, // Wait for 1 second before showing the user message
+                    () => setShowUserMessage(true), // Immediately trigger user message when typing completes
+                  ]}
+                  wrapper="p"
+                  speed={80}
+                  className="text-white"
+                  cursor={false}
+                />
               </div>
-              <div className="bg-white/90 p-4 rounded-lg rounded-br-none mb-4 ml-auto max-w-[80%]">
-                <p className="text-primary">
-                  Anong mga Scholarship ang goods para sa mga engineering?
-                </p>
-              </div>
-              <div className="bg-white/10 p-4 rounded-lg rounded-bl-none">
-                <p className="text-white">
-                  Great question! Para sa mga engineering students, here are
-                  some top options:
-                </p>
-                <ul className="list-disc pl-5 mt-2 text-white/90">
-                  <li>DOST-SEI Engineering Scholarship</li>
-                  <li>SM Engineering Scholarship</li>
-                  <li>CHED Merit Scholarship</li>
-                </ul>
-                <p className="mt-2 text-white">
-                  Would you like to know more about any of these programs?
-                </p>
-              </div>
+
+              {/* User Message */}
+              {showUserMessage && (
+                <div className="bg-white/90 p-4 rounded-lg rounded-br-none mb-4 ml-auto max-w-[90%]">
+                  <TypeAnimation
+                    sequence={[
+                      "Anong mga Scholarship ang goods para sa mga engineering?",
+                      1000, // Wait for 1 second before showing the AI response
+                      () => setShowAiResponse(true), // Immediately trigger AI response when typing completes
+                    ]}
+                    wrapper="p"
+                    speed={80}
+                    className="text-primary"
+                    cursor={false}
+                  />
+                </div>
+              )}
+
+              {/* AI Response */}
+              {showAiResponse && (
+                <div className="bg-white/10 p-4 rounded-lg rounded-bl-none mr-auto max-w-[90%]">
+                  <TypeAnimation
+                    sequence={[
+                      "Great question! Para sa mga engineering students, here are some top options: \n\n\u00A0\u00A0\u00A0• DOST-SEI Engineering Scholarship\n\u00A0\u00A0\u00A0• SM Engineering Scholarship\n\u00A0\u00A0\u00A0• CHED Merit Scholarship \n\n Would you like to know more about any of these programs?",
+                      1000,
+                    ]}
+                    wrapper="p"
+                    speed={80}
+                    className="text-white"
+                    style={{ whiteSpace: "pre-line" }}
+                    cursor={false}
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>
