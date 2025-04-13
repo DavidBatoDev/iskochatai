@@ -19,7 +19,7 @@ const CTA = () => {
         squaresClassName="hover:fill-blue-500 transition-colors duration-300 ease-in-out will-change-opacity"
       />
 
-        <div className="flex relative flex-col justify-center items-center text-center text-white p-5 sm:p-0">
+        <div className="relative flex flex-col justify-center items-center text-center text-white p-5 sm:p-0 w-auto max-w-screen-md mx-auto">          
           <h2 className="text-3xl md:text-4xl font-bold mb-6">
             Ready to Find Your Perfect Scholarship?
           </h2>
