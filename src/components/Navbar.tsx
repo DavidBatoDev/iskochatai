@@ -10,6 +10,7 @@ const Navbar = () => {
       <div className="isko-container py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
+            <img src="/icon-nobg.png" alt="icon-logo" className='size-10' />
             <span className="text-2xl font-bold text-primary">Isko<span className="text-secondary">Chat</span>AI</span>
           </div>
           <div className="hidden md:flex items-center space-x-8">

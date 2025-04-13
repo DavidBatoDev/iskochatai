@@ -17,6 +17,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Isko-Chat",
   description: "'Helping upcoming college students secure their future…",
+  icons: {
+    icon:['/favicon.ico?v=4'],
+    apple: ['/apple-touch-icon.png?v=4'],
+    shortcut: ['/apple-touch-icon.ico.png'],
+  },
 };
 
 export default function RootLayout({
@@ -31,6 +36,7 @@ export default function RootLayout({
         <meta name="theme-color" content="#000000" />
         <meta name="description" content="Scholarship Chatbot PH - IskoChat" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        
       </Head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
