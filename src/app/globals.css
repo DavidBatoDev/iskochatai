@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -45,7 +45,7 @@
 }
 
 :root {
-  --font-sans: 'Poppins', 'Roboto', sans-serif;
+  --font-sans: "Poppins", "Roboto", sans-serif;
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -53,9 +53,9 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: #007BFF;
+  --primary: #007bff;
   --primary-foreground: oklch(0.985 0 0);
-  --secondary: #FFD700;
+  --secondary: #ffd700;
   --secondary-foreground: oklch(0.145 0 0);
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
@@ -78,12 +78,12 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
-  --isko-blue: #007BFF;
-  --isko-blue-light: #4DA3FF;
-  --isko-blue-dark: #0056B3;
-  --isko-yellow: #FFD700;
-  --isko-yellow-light: #FFE249;
-  --isko-yellow-dark: #FFBF00;
+  --isko-blue: #007bff;
+  --isko-blue-light: #4da3ff;
+  --isko-blue-dark: #0056b3;
+  --isko-yellow: #ffd700;
+  --isko-yellow-light: #ffe249;
+  --isko-yellow-dark: #ffbf00;
 }
 
 .dark {
@@ -93,9 +93,9 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: #007BFF;
+  --primary: #007bff;
   --primary-foreground: oklch(0.985 0 0);
-  --secondary: #FFD700;
+  --secondary: #ffd700;
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.269 0 0);
   --muted-foreground: oklch(0.708 0 0);
@@ -120,55 +120,6 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
-/* Font imports */
-@font-face {
-  font-family: 'Poppins';
-  src: url('/fonts/Poppins-Regular.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Poppins';
-  src: url('/fonts/Poppins-Medium.woff2') format('woff2');
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Poppins';
-  src: url('/fonts/Poppins-Bold.woff2') format('woff2');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Roboto';
-  src: url('/fonts/Roboto-Regular.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Roboto';
-  src: url('/fonts/Roboto-Medium.woff2') format('woff2');
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Roboto';
-  src: url('/fonts/Roboto-Bold.woff2') format('woff2');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -191,31 +142,35 @@
   .text-primary {
     @apply text-primary;
   }
-  
+
   .text-secondary {
     @apply text-secondary;
   }
 
   .poppins {
-    font-family: 'Poppins', sans-serif;
+    font-family: "Poppins", sans-serif;
   }
-  
+
   .hero-gradient {
-    background-image: linear-gradient(90deg, #007BFF 0%, #0043B8 100%);
+    background-image: linear-gradient(90deg, #007bff 0%, #0043b8 100%);
   }
-  
+
   .grid-pattern {
     background-image: url("/lovable-uploads/107f2fea-e3db-411d-a296-799e732b90f4.png");
   }
 }
 
 @keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes fade-up {
-  from { 
+  from {
     opacity: 0;
     transform: translateY(20px);
   }
