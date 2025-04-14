@@ -13,9 +13,9 @@ const Navbar = () => {
             <span className="text-2xl font-bold text-primary">Isko<span className="text-secondary">Chat</span>AI</span>
           </div>
           <div className="hidden md:flex items-center space-x-8">
-            <a href="#how-it-works" className="text-gray-700 hover:text-primary transition-colors">How It Works</a>
-            <a href="#scholarships" className="text-gray-700 hover:text-primary transition-colors">Scholarships</a>
-            <a href="#faqs" className="text-gray-700 hover:text-primary transition-colors">FAQs</a>
+            <Link href="#how-it-works" className="text-gray-700 hover:text-primary transition-colors">How It Works</Link>
+            <Link href="#scholarships" className="text-gray-700 hover:text-primary transition-colors">Scholarships</Link>
+            <Link href="#faqs" className="text-gray-700 hover:text-primary transition-colors">FAQs</Link>
           </div>
           <Link href={'/chat'} className="hidden md:block">
             <Button className="bg-primary cursor-pointer hover:bg-isko-blue-dark text-white">
