@@ -16,19 +16,19 @@ const Navbar = () => {
           </div>
           <div className="hidden md:flex items-center space-x-8">
             <a
-              href="#how-it-works"
+              href="/#how-it-works"
               className="text-gray-700 hover:text-primary transition-colors"
             >
               How It Works
             </a>
             <a
-              href="#scholarships"
+              href="/#scholarships"
               className="text-gray-700 hover:text-primary transition-colors"
             >
               Scholarships
             </a>
             <a
-              href="#faqs"
+              href="/#faqs"
               className="text-gray-700 hover:text-primary transition-colors"
             >
               FAQs
