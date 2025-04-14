@@ -56,12 +56,22 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ className }) => {
     }
 
     try {
-      // Here you would typically send data to your API
-      // For demonstration, we'll simulate a successful submission
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await fetch("/api/feedback", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to submit feedback");
+      }
+  
       setSubmitted(true);
-    } catch (err) {
-      setError("An error occurred while submitting your feedback");
+    } catch (err: any) {
+      setError(err.message || "An error occurred while submitting your feedback");
     } finally {
       setSubmitting(false);
     }
