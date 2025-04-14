@@ -11,6 +11,7 @@ const scholarships = [
     eligibility: "Top 5% of graduating class, Filipino citizen",
     icon: <GraduationCap className="w-12 h-12 text-primary" />,
     color: "bg-blue-50",
+    link:"https://www.science-scholarships.ph/",
   },
   {
     name: "CHED Scholarship",
@@ -20,6 +21,7 @@ const scholarships = [
     eligibility: "Must be Filipino, academically skilled, in financial need",
     icon: <GraduationCap className="w-12 h-12 text-primary" />,
     color: "bg-green-50",
+    link:"https://ched.gov.ph/merit-scholarship/",
   },
   {
     name: "SM Foundation Scholarship",
@@ -30,6 +32,7 @@ const scholarships = [
       "From economically challenged families, excellent academic record",
     icon: <Users className="w-12 h-12 text-primary" />,
     color: "bg-yellow-50",
+    link:"https://www.sm-foundation.org/what_we_do/college-scholarship-program/#sm-college-scholarship",
   },
   {
     name: "Megaworld Foundation",
@@ -39,6 +42,7 @@ const scholarships = [
     eligibility: "High academic achievers with leadership potential",
     icon: <GraduationCap className="w-12 h-12 text-primary" />,
     color: "bg-purple-50",
+    link:"https://www.megaworldfoundation.com/scholarship_program",
   },
   {
     name: "Jollibee Group Foundation",
@@ -48,6 +52,7 @@ const scholarships = [
     eligibility: "Children of JFC employees, financially challenged students",
     icon: <Users className="w-12 h-12 text-primary" />,
     color: "bg-red-50",
+    link:"https://foundation.jollibeegroup.com/programs/access-curriculum-employability",
   },
   {
     name: "Ayala Foundation",
@@ -57,6 +62,7 @@ const scholarships = [
     eligibility: "Outstanding academic records, leadership qualities",
     icon: <Calendar className="w-12 h-12 text-primary" />,
     color: "bg-indigo-50",
+    link: "https://www.ayalafoundation.org/program/u-go-scholar-grant/"
   },
 ];
 
@@ -107,10 +113,18 @@ const Scholarships = () => {
                   </p>
                 </div>
                 <Button
+                  asChild
                   variant="outline"
                   className="w-full group-hover:border-primary/50 transition-colors"
                 >
-                  Learn More <ExternalLink className="ml-2 w-4 h-4" />
+                  <a
+                    href={scholarship.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center"
+                  >
+                    Learn More <ExternalLink className="ml-2 w-4 h-4" />
+                  </a>
                 </Button>
               </div>
             </div>
