@@ -56,7 +56,6 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ className }) => {
     }
 
     try {
-      alert("Submitting feedback...");
       const response = await fetch("/api/feedback", {
         method: "POST",
         headers: {
