@@ -1,13 +1,14 @@
 "use client"
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { NextPage } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '../../hooks/use-auth';
 
 const Signup: NextPage = () => {
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
+    username: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -15,6 +16,18 @@ const Signup: NextPage = () => {
   });
   
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
+  
+  const { signUp, signInWithGoogle, signInWithFacebook, isAuthenticated } = useAuth();
+  const router = useRouter();
+  
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push('/chat');
+    }
+  }, [isAuthenticated, router]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -32,12 +45,8 @@ const Signup: NextPage = () => {
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     
-    if (!formData.firstName.trim()) {
-      newErrors.firstName = 'First name is required';
-    }
-    
-    if (!formData.lastName.trim()) {
-      newErrors.lastName = 'Last name is required';
+    if (!formData.username.trim()) {
+      newErrors.username = 'Username is required';
     }
     
     if (!formData.email.trim()) {
@@ -64,14 +73,74 @@ const Signup: NextPage = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (validateForm()) {
-      // Here you would typically send the data to your API
-      console.log('Form submitted:', formData);
-      // Redirect to profile page after successful signup
-      window.location.href = "/profile"; // Or use router.push for Next.js navigation
+      setIsSubmitting(true);
+      setStatusMessage(null);
+      
+      try {
+        const { error } = await signUp(
+          formData.email, 
+          formData.password, 
+          { 
+            username: formData.username
+          }
+        );
+        
+        if (error) {
+          setStatusMessage({
+            type: 'error',
+            text: error.message || 'Failed to create account'
+          });
+        } else {
+          setStatusMessage({
+            type: 'success',
+            text: 'Account created successfully! Please check your email to verify your account.'
+          });
+          
+          // Clear form data
+          setFormData({
+            username: '',
+            email: '',
+            password: '',
+            confirmPassword: '',
+            agreeToTerms: false,
+          });
+        }
+      } catch (error: any) {
+        setStatusMessage({
+          type: 'error',
+          text: error.message || 'An unexpected error occurred'
+        });
+      } finally {
+        setIsSubmitting(false);
+      }
+    }
+  };
+
+  const handleGoogleSignUp = async () => {
+    try {
+      await signInWithGoogle();
+      // The redirect will be handled by Supabase
+    } catch (error: any) {
+      setStatusMessage({
+        type: 'error',
+        text: error.message || 'Failed to sign up with Google'
+      });
+    }
+  };
+
+  const handleFacebookSignUp = async () => {
+    try {
+      await signInWithFacebook();
+      // The redirect will be handled by Supabase
+    } catch (error: any) {
+      setStatusMessage({
+        type: 'error',
+        text: error.message || 'Failed to sign up with Facebook'
+      });
     }
   };
 
@@ -98,7 +167,7 @@ const Signup: NextPage = () => {
         </h2>
         <p className="mt-2 text-center text-sm text-blue-200">
           Already have an account?
-          <Link href="/login" className="ml-1 font-medium text-white hover:text-blue-100 focus:outline-none focus:underline transition ease-in-out duration-150">
+          <Link href="/signin" className="ml-1 font-medium text-white hover:text-blue-100 focus:outline-none focus:underline transition ease-in-out duration-150">
             Sign in here
           </Link>
         </p>
@@ -106,42 +175,45 @@ const Signup: NextPage = () => {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
-              <div>
-                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
-                  First name
-                </label>
-                <div className="mt-1">
-                  <input
-                    type="text"
-                    name="firstName"
-                    id="firstName"
-                    autoComplete="given-name"
-                    value={formData.firstName}
-                    onChange={handleChange}
-                    className={`appearance-none block w-full px-3 py-2 border ${errors.firstName ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'} rounded-md shadow-sm placeholder-gray-400 focus:outline-none sm:text-sm`}
-                  />
-                  {errors.firstName && <p className="mt-1 text-sm text-red-600">{errors.firstName}</p>}
+          {statusMessage && (
+            <div className={`mb-4 ${statusMessage.type === 'success' ? 'bg-green-50 border-green-400' : 'bg-red-50 border-red-400'} border-l-4 p-4`}>
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  {statusMessage.type === 'success' ? (
+                    <svg className="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                  ) : (
+                    <svg className="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    </svg>
+                  )}
+                </div>
+                <div className="ml-3">
+                  <p className={`text-sm ${statusMessage.type === 'success' ? 'text-green-700' : 'text-red-700'}`}>
+                    {statusMessage.text}
+                  </p>
                 </div>
               </div>
-
-              <div>
-                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
-                  Last name
-                </label>
-                <div className="mt-1">
-                  <input
-                    type="text"
-                    name="lastName"
-                    id="lastName"
-                    autoComplete="family-name"
-                    value={formData.lastName}
-                    onChange={handleChange}
-                    className={`appearance-none block w-full px-3 py-2 border ${errors.lastName ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'} rounded-md shadow-sm placeholder-gray-400 focus:outline-none sm:text-sm`}
-                  />
-                  {errors.lastName && <p className="mt-1 text-sm text-red-600">{errors.lastName}</p>}
-                </div>
+            </div>
+          )}
+          
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            <div>
+              <label htmlFor="username" className="block text-sm font-medium text-gray-700">
+                Username
+              </label>
+              <div className="mt-1">
+                <input
+                  type="text"
+                  name="username"
+                  id="username"
+                  autoComplete="username"
+                  value={formData.username}
+                  onChange={handleChange}
+                  className={`appearance-none block w-full px-3 py-2 border ${errors.username ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'} rounded-md shadow-sm placeholder-gray-400 focus:outline-none sm:text-sm`}
+                />
+                {errors.username && <p className="mt-1 text-sm text-red-600">{errors.username}</p>}
               </div>
             </div>
 
@@ -220,9 +292,20 @@ const Signup: NextPage = () => {
             <div>
               <button
                 type="submit"
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                disabled={isSubmitting}
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
               >
-                Create Account
+                {isSubmitting ? (
+                  <span className="flex items-center">
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Processing...
+                  </span>
+                ) : (
+                  'Create Account'
+                )}
               </button>
               <p className="mt-2 text-xs text-center text-gray-500">
                 You'll be prompted to complete your profile after signing up
@@ -244,6 +327,7 @@ const Signup: NextPage = () => {
               <div>
                 <button
                   type="button"
+                  onClick={handleFacebookSignUp}
                   className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
                 >
                   <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -255,6 +339,7 @@ const Signup: NextPage = () => {
               <div>
                 <button
                   type="button"
+                  onClick={handleGoogleSignUp}
                   className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
                 >
                   <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
