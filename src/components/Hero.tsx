@@ -43,7 +43,7 @@ const Hero = () => {
                   Ask IskoChatAI diretly
                 </Button>
               </Link>
-              <Link href={"/Login"} className="w-full sm:w-auto">
+              <Link href={"/signin"} className="w-full sm:w-auto">
               <Button
                 variant="outline"
                 className="bg-white/10 text-white border-white/20 hover:bg-white/20 transition-transform duration-300 ease-in-out hover:scale-105 w-full sm:w-auto"
