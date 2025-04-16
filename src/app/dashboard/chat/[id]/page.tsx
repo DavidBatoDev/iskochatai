@@ -17,6 +17,11 @@ import {
   UserCircle,
   ChevronLeft,
   ChevronRight,
+  Loader2,
+  BookOpen,
+  GraduationCap,
+  Award,
+  FileQuestion,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import {
@@ -27,7 +32,7 @@ import {
 import { useAuthStore } from "@/lib/auth";
 import ChatSidebar from "@/components/ChatSidebar";
 import { useConversationsStore } from "@/lib/conversationStore";
-import {getAuthHeaders} from "@/lib/api";
+import { getAuthHeaders } from "@/lib/api";
 
 export default function ChatPage() {
   const params = useParams();
@@ -59,6 +64,7 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetchingMessages, setIsFetchingMessages] = useState(false);
   const [webSearchEnabled, setWebSearchEnabled] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -74,6 +80,7 @@ export default function ChatPage() {
       }
 
       try {
+        setIsFetchingMessages(true);
         const headers = await getAuthHeaders();
         console.log("Fetching messages for conversation:", conversationId);
         console.log("Headers being sent:", JSON.stringify(headers));
@@ -106,6 +113,8 @@ export default function ChatPage() {
         }
       } catch (error) {
         console.error("Error fetching messages:", error);
+      } finally {
+        setIsFetchingMessages(false);
       }
     };
 
@@ -195,6 +204,8 @@ export default function ChatPage() {
 
       setMessages([...newMessages, assistantMessage]);
 
+      setIsLoading(false);
+
       // Refresh the conversations list to show the updated last message
       const convoResponse = await fetch("/api/conversations", {
         headers: await getAuthHeaders(),
@@ -260,10 +271,7 @@ export default function ChatPage() {
   };
 
   // Delete a conversation
-  const deleteConversation = async (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    e.preventDefault(); // Prevent navigation
-
+  const deleteConversation = async (id: string) => {
     try {
       const response = await fetch(`/api/conversations/${id}`, {
         method: "DELETE",
@@ -347,6 +355,26 @@ export default function ChatPage() {
     setWebSearchEnabled(!webSearchEnabled);
   };
 
+  // Empty chat placeholder suggestions
+  const suggestions = [
+    {
+      icon: <BookOpen className="w-5 h-5 text-yellow-400" />,
+      text: "What scholarships are available for Computer Science students?",
+    },
+    {
+      icon: <GraduationCap className="w-5 h-5 text-yellow-400" />,
+      text: "How do I apply for admission to UP Diliman?",
+    },
+    {
+      icon: <Award className="w-5 h-5 text-yellow-400" />,
+      text: "What are the requirements for DOST scholarship?",
+    },
+    {
+      icon: <FileQuestion className="w-5 h-5 text-yellow-400" />,
+      text: "When is the UPCAT application deadline?",
+    },
+  ];
+
   return (
     <div className="flex h-screen bg-gradient-to-r from-blue-600 to-indigo-800">
       {/* Sidebar Component */}
@@ -401,7 +429,7 @@ export default function ChatPage() {
               </h1>
             </div>
             <div className="flex items-center gap-3">
-              <Tooltip delayDuration={700}>
+              {/* <Tooltip delayDuration={700}>
                 <TooltipTrigger asChild>
                   <button
                     onClick={resetChat}
@@ -413,7 +441,7 @@ export default function ChatPage() {
                 <TooltipContent className="bg-white p-2 rounded-md shadow-lg">
                   Reset Chat
                 </TooltipContent>
-              </Tooltip>
+              </Tooltip> */}
 
               <Tooltip delayDuration={700}>
                 <TooltipTrigger asChild>
@@ -435,7 +463,18 @@ export default function ChatPage() {
         {/* Chat Messages */}
         <div className="flex-1 overflow-y-auto px-4 py-6 md:pl-64">
           <div className="max-w-3xl mx-auto space-y-6">
-            {messages.length > 0 && messages.map((message, index) => (
+            {/* Loading spinner when fetching messages */}
+            {isFetchingMessages && (
+              <div className="flex justify-center items-center h-[400px]">
+                <div className="text-center">
+                  <Loader2 className="w-12 h-12 text-yellow-400 animate-spin mx-auto mb-4" />
+                  <p className="text-white text-lg">Loading conversation...</p>
+                </div>
+              </div>
+            )}
+
+            {/* Messages list */}
+            {!isFetchingMessages && messages.length > 0 && messages.map((message, index) => (
               <div
                 key={index}
                 className={`flex ${
@@ -600,24 +639,53 @@ export default function ChatPage() {
                 </div>
               </div>
             ))}
-            {messages.length === 0 && (
+
+            {/* Empty chat placeholder with suggestions */}
+            {!isFetchingMessages && messages.length === 0 && (
               <div className="flex justify-center items-center h-[400px]">
-                <div className="bg-opacity-10 backdrop-blur-mdrounded-2xl p-4 max-w-[80%]">
-                  <p className="text-center text-xl text-white">
-                    Start a conversation with IskoBot! Ask about scholarships,
-                    applications, deadlines, and more.
+                <div className="rounded-2xl max-w-[100%]">
+                  <div className="text-center mb-8">
+                    <Bot className="w-16 h-16 text-yellow-400 mx-auto mb-4" />
+                    <h2 className="text-2xl font-bold text-white mb-2">Welcome to IskoBot AI</h2>
+                    <p className="text-blue-100">
+                      Your AI assistant for scholarship and college application guidance
+                    </p>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {suggestions.map((suggestion, index) => (
+                      <button
+                        key={index}
+                        className="cursor-pointer flex items-start p-4 bg-indigo-800 bg-opacity-40 hover:bg-opacity-60 rounded-lg transition-all text-left"
+                        onClick={() => {
+                          setInput(suggestion.text);
+                          if (textareaRef.current) {
+                            textareaRef.current.focus();
+                          }
+                        }}
+                      >
+                        <div className="mr-3 mt-1">{suggestion.icon}</div>
+                        <p className="text-white text-sm">{suggestion.text}</p>
+                      </button>
+                    ))}
+                  </div>
+
+                  <p className="text-center text-xs text-blue-200 mt-6">
+                    You can ask any questions about scholarships, college applications, or educational opportunities
                   </p>
                 </div>
               </div>
             )}
+
+            {/* Bot is typing indicator */}
             {isLoading && (
               <div className="flex justify-start">
                 <div className="bg-white bg-opacity-10 backdrop-blur-md text-black rounded-2xl rounded-bl-none border border-white border-opacity-20 p-4 max-w-[80%]">
                   <div className="flex items-center gap-2 mb-2">
                     <Bot className="w-4 h-4 text-yellow-400" />
-                    <span className="font-semibold text-black">IskoBot</span>
+                    <span className="font-semibold text-white">IskoBot</span>
                     {webSearchEnabled && (
-                      <span className="flex items-center gap-1 text-xs bg-blue-500 text-black px-2 py-0.5 rounded-full animate-pulse">
+                      <span className="flex items-center gap-1 text-xs bg-blue-500 text-white px-2 py-0.5 rounded-full animate-pulse">
                         <Search className="w-3 h-3" /> Searching...
                       </span>
                     )}
