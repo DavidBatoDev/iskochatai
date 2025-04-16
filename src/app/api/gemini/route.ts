@@ -16,7 +16,6 @@ interface SearchResult {
 async function performWebSearch(query: string): Promise<SearchResult[]> {
   const enhancedQuery = `${query} philippines scholarship`;
     
-
   try {
     const response = await fetch(
       `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_API_KEY}&cx=${GOOGLE_CSE_ID}&q=${encodeURIComponent(enhancedQuery)}&cr=countryPH&gl=ph`
@@ -61,7 +60,6 @@ export async function POST(request: NextRequest) {
       userMessages[userMessages.length - 1].content : "";
     
     // Determine if this query might benefit from web search
-    // Simple heuristic: if the message contains keywords related to scholarships, academic programs, or careers
     const searchKeywords = [
       // Existing Keywords
       "search", "sumearch", "magsearch", "mag-search", "humanap", "hanap", "hanapan", 
@@ -70,7 +68,7 @@ export async function POST(request: NextRequest) {
       "tuition", "financial aid",
 
       // Additional Academic/Scholarship Keywords (English)
-      "apply", "apply now", "eligibility", "qualification", "qualifications", "due date", 
+      "apply", "apply now", "eligibility", "qualification", "qualifications", "due date",
       "scholarships", "enroll", "enrollment", "major", "course", "degree", "bachelor", "master", 
       "PhD", "institute", "academic", "education", "study", "exam", "test", "merit", "grant", 
       "award", "fellowship", "stipend", "scholastic", "credentials", "certificate", "transcript",
