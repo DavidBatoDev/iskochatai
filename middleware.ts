@@ -33,14 +33,14 @@ export async function middleware(req: NextRequest) {
   
   // Handle protected routes
   if (protectedRoutes.some(route => pathname.startsWith(route)) && !isAuthenticated) {
-    const redirectUrl = new URL('/login', req.url);
+    const redirectUrl = new URL('/signin', req.url);
     redirectUrl.searchParams.set('redirect', pathname);
     return NextResponse.redirect(redirectUrl);
   }
   
   // Handle auth routes - redirect to dashboard if already authenticated
   if (authRoutes.some(route => pathname.startsWith(route)) && isAuthenticated) {
-    return NextResponse.redirect(new URL('/dashboard', req.url));
+    return NextResponse.redirect(new URL('/dashboard/chat/new', req.url));
   }
   
   return res;

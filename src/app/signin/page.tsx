@@ -19,7 +19,7 @@ const Login: NextPage = () => {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      router.push('/dashboard/chat');
+      router.push('/dashboard/chat/new');
     }
   }, [isAuthenticated, router]);
 
