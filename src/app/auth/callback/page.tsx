@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase, useAuthStore } from "../../../lib/auth";
+import { useAuthStore } from "../../../lib/auth";
 
 export default function AuthCallback() {
   const router = useRouter();
@@ -12,24 +12,25 @@ export default function AuthCallback() {
 
   useEffect(() => {
     async function handleCallback() {
-      // Process the URL hash fragment and exchange code for session
-      const { data, error } = await supabase.auth.exchangeCodeForSession(
-        window.location.hash.substring(1)
-      )
-
-      if (error) {
-        console.error('Auth callback error', error)
-        setError('Failed to complete authentication. Please try again.')
-        return
+      try {
+        // Supabase client will automatically handle the auth tokens
+        // from the URL fragment (#access_token=...)
+        await refreshSession();
+        
+        // Redirect to dashboard or intended page after successful authentication
+        router.push("/dashboard/chat/new");
+      } catch (err) {
+        console.error("Authentication error:", err);
+        setError("Failed to complete authentication. Please try again.");
+        // Wait a moment before redirecting to make sure error is visible
+        setTimeout(() => {
+          router.push("/signin?error=auth_callback_failed");
+        }, 3000);
       }
-
-      // Now the session is stored and you can refresh your store
-      // e.g. await useAuthStore.getState().refreshSession()
-      router.push('/dashboard/chat/new')
     }
 
-    handleCallback()
-  }, [router])
+    handleCallback();
+  }, [refreshSession, router]);
 
   if (error) {
     return (
