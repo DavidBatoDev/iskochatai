@@ -14,7 +14,7 @@ export async function GET(
 ) {
   try {
     // Correctly await params before using id
-    const { id } = await Promise.resolve(params);
+    const id = await params.id;
     const conversationId = id;
     
     const headers: Record<string, string> = {};
@@ -137,7 +137,7 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await Promise.resolve(params);
+    const id = await params.id;
     const conversationId = id;
 
 
@@ -296,7 +296,7 @@ export async function PATCH(
 ) {
   try {
     // Correctly await params before using id
-    const { id } = await Promise.resolve(params);
+    const id = await params.id;
     const conversationId = id;
     
     const userId = await getUserIdFromRequest(request);
