@@ -14,7 +14,7 @@ export async function GET(
 ) {
   try {
     // Correctly await params before using id
-    const id = await Promise.resolve(params);
+    const { id } = await Promise.resolve(params);
     const conversationId = id;
     
     const headers: Record<string, string> = {};
