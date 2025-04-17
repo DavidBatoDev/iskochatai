@@ -10,12 +10,12 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 // GET - Fetch chat messages for a specific conversation
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
-    // Fix: Await params before using id
-    const { id } = await Promise.resolve(params);
-    const conversationId = id;
+    // Correctly await params before using id
+    const params = await Promise.resolve(context.params);
+    const conversationId = params.id;
     
     const headers: Record<string, string> = {};
     request.headers.forEach((value, key) => {
@@ -134,12 +134,12 @@ export async function GET(
 // POST - Send a message and get a response from Gemini
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
-    // Fix: Await params before using id
-    const { id } = await Promise.resolve(params);
-    const conversationId = id;
+    // Correctly await params before using id
+    const params = await Promise.resolve(context.params);
+    const conversationId = params.id;
     
     const { messages, enableWebSearch } = await request.json();
     const userId = await getUserIdFromRequest(request);
@@ -185,7 +185,7 @@ export async function POST(
     // Get the latest user message
     const userMessage = messages[messages.length - 1];
 
-    console.log(request.nextUrl.origin)
+    console.log(request.nextUrl.origin);
 
     try {
       // Call the Gemini API with user ID and conversation ID
@@ -292,12 +292,12 @@ export async function POST(
 // PATCH - Reset chat history
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
-    // Fix: Await params before using id
-    const { id } = await Promise.resolve(params);
-    const conversationId = id;
+    // Correctly await params before using id
+    const params = await Promise.resolve(context.params);
+    const conversationId = params.id;
     
     const userId = await getUserIdFromRequest(request);
     
