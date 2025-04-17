@@ -101,6 +101,7 @@ export const useAuthStore = create<AuthState>()(
               data: {
                 username: metadata?.username,
               },
+              emailRedirectTo: `${window.location.origin}/auth/callback`, 
             },
           });
 
