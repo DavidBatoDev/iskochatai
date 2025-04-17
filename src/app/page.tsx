@@ -13,9 +13,7 @@ const Index = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-grow">
-        <AnimateOnScroll>
-          <Hero />
-        </AnimateOnScroll>
+        <Hero />
 
         <AnimateOnScroll delay={0.1}>
           <HowItWorks />
@@ -29,9 +27,7 @@ const Index = () => {
           <FAQs />
         </AnimateOnScroll>
 
-        <AnimateOnScroll delay={0.01}>
-          <CTA />
-        </AnimateOnScroll>
+        <CTA />
       </main>
       <Footer />
     </div>

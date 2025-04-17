@@ -13,7 +13,7 @@ const Hero = () => {
   const [showAiResponse, setShowAiResponse] = useState(false);
 
   return (
-    <section className="min-h-[calc(100vh-72px)] flex flex-col justify-center items-center relative overflow-hidden bg-gradient-to-r from-blue-600 to-indigo-800 py-10 px-5">
+    <section id="hero" className="min-h-[calc(100vh-72px)] scroll-mt-[72px] flex flex-col justify-center items-center relative overflow-hidden bg-gradient-to-r from-blue-600 to-indigo-800 py-10 px-5">
       <AnimatedGridPattern
         numSquares={70}
         maxOpacity={0.1}
