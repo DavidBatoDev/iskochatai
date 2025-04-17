@@ -40,17 +40,19 @@ const Hero = () => {
               <Link href={"/chat"} className="w-full sm:w-auto">
                 <Button size="lg" className="w-full">
                   <MessageCircle className="w-5 h-5 mr-2" />
-                  Chat with Isko Now
+                  Ask IskoChatAI diretly
                 </Button>
               </Link>
+              <Link href={"/signin"} className="w-full sm:w-auto">
               <Button
                 variant="outline"
                 className="bg-white/10 text-white border-white/20 hover:bg-white/20 transition-transform duration-300 ease-in-out hover:scale-105 w-full sm:w-auto"
                 size="lg"
               >
                 <Search className="w-5 h-5 mr-2" />
-                Explore Scholarships
+                Import Profile by Logging in
               </Button>
+              </Link>
             </div>
           </div>
           <div className="hidden md:block relative animate-fade-in">
