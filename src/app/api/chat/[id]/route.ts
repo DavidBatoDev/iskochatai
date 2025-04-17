@@ -13,9 +13,8 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    // Fix: Await params before using id
-    const { id } = await Promise.resolve(params);
-    const conversationId = id;
+    // Access params directly without awaiting
+    const conversationId = params.id;
     
     const headers: Record<string, string> = {};
     request.headers.forEach((value, key) => {
@@ -137,9 +136,8 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    // Fix: Await params before using id
-    const { id } = await Promise.resolve(params);
-    const conversationId = id;
+    // Access params directly without awaiting
+    const conversationId = params.id;
     
     const { messages, enableWebSearch } = await request.json();
     const userId = await getUserIdFromRequest(request);
@@ -295,9 +293,8 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
-    // Fix: Await params before using id
-    const { id } = await Promise.resolve(params);
-    const conversationId = id;
+    // Access params directly without awaiting
+    const conversationId = params.id;
     
     const userId = await getUserIdFromRequest(request);
     
