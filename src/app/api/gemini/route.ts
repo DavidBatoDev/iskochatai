@@ -341,7 +341,7 @@ export async function POST(request: NextRequest) {
     
     // Format messages for Gemini API
     // First include conversation history if available
-    let conversationHistoryFormatted = [];
+    const conversationHistoryFormatted = [];
     if (isAuthenticated && conversationHistory.length > 0) {
       for (const entry of conversationHistory) {
         if (entry.message && entry.message.trim() !== '') {
