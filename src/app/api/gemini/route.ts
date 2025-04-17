@@ -19,6 +19,8 @@ interface SearchResult {
 }
 
 interface UserProfile {
+  gender: string;
+  family_income: any;
   email?: string;
   username?: string;
   school_name?: string;
@@ -296,6 +298,13 @@ export async function POST(request: NextRequest) {
       if (userProfile.school_name) {
         profileContext += `\n- Currently at/interested in: ${userProfile.school_name}`;
       }
+      if (userProfile.family_income) {
+        profileContext += `\n- Family Income: ${userProfile.family_income}`;
+      }
+      // gender
+      if (userProfile.gender) {
+        profileContext += '\n- Gender: ' + userProfile.gender
+      }
       if (userProfile.course) {
         profileContext += `\n- Course/Major: ${userProfile.course}`;
       }
@@ -311,7 +320,7 @@ export async function POST(request: NextRequest) {
       if (userProfile.region) {
         profileContext += `\n- Region: ${userProfile.region}`;
       }
-      if (userProfile.academic_gwa) {
+      if (userProfile.academic_gwa && userProfile.academic_gwa > 0) {
         profileContext += `\n- Academic GWA: ${userProfile.academic_gwa}`;
       }
       
