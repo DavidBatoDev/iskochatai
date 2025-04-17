@@ -325,7 +325,6 @@ export async function POST(request: NextRequest) {
     Do not provide any personal opinions or unverified information.
     If the user asks about a specific scholarship, provide details about it, including eligibility criteria, application process, and deadlines.
     If they ask about something that is not related to scholarships, politely redirect them to the topic of scholarships.
-    if they ask you to search online and you can't just say "There's something wrong with my search engine, please try again later."
     ${searchContext}
     ${profileContext}
     
