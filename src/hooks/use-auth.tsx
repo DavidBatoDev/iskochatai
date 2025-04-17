@@ -1,8 +1,9 @@
-// hooks/useAuth.ts
-import { useEffect } from "react";
-import { useAuthStore, initAuthListener } from "../lib/auth";
+// hooks/use-auth.ts
+import { useEffect } from 'react'
+import { useAuthStore, initAuthListener } from '@/lib/auth'
 
 export function useAuth() {
+  // Extract all the auth state and methods we need
   const {
     user,
     session,
@@ -16,24 +17,22 @@ export function useAuth() {
     updateProfile,
     refreshSession,
     signInWithGoogle,
-    signInWithFacebook,
-  } = useAuthStore();
+    signInWithFacebook
+  } = useAuthStore()
 
-  // Initialize the auth listener once when the component mounts
+  // Initialize the auth listener when the hook is used
   useEffect(() => {
-    // Call refreshSession once to ensure we have the latest auth state
-    refreshSession();
-
-    // Initialize the auth listener
-    const unsubscribe = initAuthListener();
-
-    // Cleanup function if needed
+    // Initialize the auth listener and store the unsubscribe function
+    const unsubscribe = initAuthListener()
+    
+    // Call refreshSession to check if the user is already logged in
+    refreshSession()
+    
+    // Clean up the listener when the component unmounts
     return () => {
-      if (typeof unsubscribe === "function") {
-        unsubscribe();
-      }
-    };
-  }, [refreshSession]);
+      unsubscribe()
+    }
+  }, [])
 
   return {
     user,
@@ -46,7 +45,8 @@ export function useAuth() {
     signOut,
     resetPassword,
     updateProfile,
+    refreshSession,
     signInWithGoogle,
-    signInWithFacebook,
-  };
+    signInWithFacebook
+  }
 }
