@@ -308,7 +308,7 @@ const IskoProfilePage: React.FC = () => {
     
     try {
       const educationLevel = getEducationLevel(tempProfile.grade_level);
-      let updatedProfile = {...tempProfile};
+      const updatedProfile = {...tempProfile};
       
       // Handle "Others" strand selection for senior high
       if (educationLevel === 'senior-high' && tempProfile.course === 'Others' && tempProfile.other_course) {
@@ -387,7 +387,7 @@ const IskoProfilePage: React.FC = () => {
 
   const handleSignOut = async () => {
     await signOut();
-    router.push('/auth/login');
+    router.push('/signin');
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
@@ -712,7 +712,7 @@ const IskoProfilePage: React.FC = () => {
           <h2 className="text-2xl font-bold text-indigo-700 mb-4">Access Denied</h2>
           <p className="mb-6">You need to be logged in to view your profile.</p>
           <button 
-            onClick={() => router.push('/auth/login')}
+            onClick={() => router.push('/signin')}
             className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors"
           >
             Log In

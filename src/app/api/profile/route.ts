@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Process arrays if needed
-    let processedData = { ...data };
+    const processedData = { ...data };
     if (processedData.program_interest && typeof processedData.program_interest === 'string') {
       // Remove curly braces if they exist and split by comma
       processedData.program_interest = processedData.program_interest
@@ -72,7 +72,7 @@ export async function PUT(request: NextRequest) {
         }
     
         // Process arrays for storage
-        let processedData = { ...profileData };
+        const processedData = { ...profileData };
         
         // Validate numeric fields
         if (processedData.family_income !== undefined) {

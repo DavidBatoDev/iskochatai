@@ -83,7 +83,7 @@ const Login: NextPage = () => {
           Sign in to your account
         </h2>
         <p className="mt-2 text-center text-sm text-blue-200">
-          Don't have an account?
+          Don&apos;t have an account?
           <Link href="/signup" className="ml-1 font-medium text-white hover:text-blue-100 focus:outline-none focus:underline transition ease-in-out duration-150">
             Sign up here
           </Link>

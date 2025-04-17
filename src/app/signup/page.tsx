@@ -308,7 +308,7 @@ const Signup: NextPage = () => {
                 )}
               </button>
               <p className="mt-2 text-xs text-center text-gray-500">
-                You'll be prompted to complete your profile after signing up
+                You&apos;ll be prompted to complete your profile after signing up
               </p>
             </div>
           </form>
