@@ -1,7 +1,8 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-import { User, LogOut, Edit3, Save, X, Mail, MapPin, School, Book, Calculator, CreditCard, Calendar, ArrowLeft, X as XIcon, Check } from 'lucide-react';
+import { User, LogOut, Edit3, Save, X, Mail, MapPin, School, Book, ArrowLeft, X as XIcon, Check } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useAuthStore, supabase } from '@/lib/auth'; 
 
 interface UserProfile {
   id: string;
@@ -28,6 +29,40 @@ interface InputGroup {
   icon: React.ReactNode;
   fields: string[];
 }
+
+// Define Toast props interface
+interface ToastProps {
+  message: string;
+  type: 'success' | 'error';
+  onClose: () => void;
+}
+
+// Toast component
+const Toast = ({ message, type, onClose }: ToastProps) => {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onClose();
+    }, 3000); // Auto dismiss after 3 seconds
+    
+    return () => clearTimeout(timer);
+  }, [onClose]);
+  
+  const bgColor = type === 'success' ? 'bg-green-500' : 'bg-red-500';
+  
+  return (
+    <div className={`fixed top-4 right-4 z-50 ${bgColor} text-white px-4 py-3 rounded-lg shadow-lg flex items-center animate-fade-in-down`}>
+      {type === 'success' ? (
+        <Check size={18} className="mr-2" />
+      ) : (
+        <XIcon size={18} className="mr-2" />
+      )}
+      <span>{message}</span>
+      <button onClick={onClose} className="ml-3 text-white hover:text-gray-200">
+        <XIcon size={16} />
+      </button>
+    </div>
+  );
+};
 
 // Define options for dropdown menus
 const genderOptions = ["Male", "Female", "Non-binary", "Prefer not to say"];
@@ -72,22 +107,40 @@ const shsStrandOptions = [
 
 const IskoProfilePage: React.FC = () => {
   const router = useRouter();
+  const { user, isAuthenticated, signOut, updateProfile } = useAuthStore();
   const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  // Toast state
+  const [toast, setToast] = useState<{
+    show: boolean;
+    message: string;
+    type: 'success' | 'error';
+  }>({
+    show: false,
+    message: '',
+    type: 'success'
+  });
+
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+  
   const [profile, setProfile] = useState<UserProfile>({
-    id: "12345-abcde",
-    email: "student@example.edu",
-    username: "student123",
-    birthday: "2000-05-15",
-    gender: "Prefer not to say",
-    address: "123 Campus Drive",
-    region: "Metro Manila",
-    school_name: "National University",
-    course: "Computer Science",
-    grade_level: "3rd Year College",
-    program_interest: ["Software Development", "Web Development"],
-    family_income: 350000,
-    academic_gwa: 1.75,
-    scholarship_interest: ["Merit-based Scholarship", "Research"],
+    id: "",
+    email: "",
+    username: "",
+    birthday: "",
+    gender: "",
+    address: "",
+    region: "",
+    school_name: "",
+    course: "",
+    grade_level: "",
+    program_interest: [],
+    family_income: 0,
+    academic_gwa: 0,
+    scholarship_interest: [],
     other_course: ""
   });
 
@@ -97,8 +150,82 @@ const IskoProfilePage: React.FC = () => {
     scholarship_interest: false
   });
 
+  // Close toast handler
+  const closeToast = () => {
+    setToast((prev) => ({ ...prev, show: false }));
+  };
+
+  // Show toast helper function
+  const showToast = (message: string, type: 'success' | 'error') => {
+    setToast({
+      show: true,
+      message,
+      type
+    });
+  };
+
+  // Fetch user profile data from Supabase
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!isAuthenticated || !user) {
+        setIsLoading(false);
+        router.push('/signin');
+        return;
+      }
+    
+      try {
+        const response = await fetch(`/api/profile?userId=${user.id}`);
+        const result = await response.json();
+        
+        if (!response.ok) {
+          console.error('Error fetching profile:', result.error);
+          setError('Failed to load profile data. Please try again.');
+          setIsLoading(false);
+          return;
+        }
+        
+        if (result.data) {
+          setProfile(result.data);
+          setTempProfile(result.data);
+        } else {
+          // No profile found, create a default one
+          console.log('No profile found for user:', user.id);
+          
+          const defaultProfile = {
+            id: user.id,
+            email: user.email || '',
+            username: user.email ? user.email.split('@')[0] : '',
+            birthday: '',
+            gender: '',
+            address: '',
+            region: '',
+            school_name: '',
+            course: '',
+            grade_level: '',
+            program_interest: [],
+            family_income: 0,
+            academic_gwa: 0,
+            scholarship_interest: []
+          };
+          
+          setProfile(defaultProfile);
+          setTempProfile(defaultProfile);
+        }
+      } catch (err) {
+        console.error('Error:', err);
+        setError('An unexpected error occurred. Please try again.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+  
+    fetchProfile();
+  }, [isAuthenticated, user, router]);
+
   // Function to get educational level category
   const getEducationLevel = (gradeLevel: string): 'junior-high' | 'senior-high' | 'college' => {
+    if (!gradeLevel) return 'college'; // Default value
+    
     if (gradeLevel.includes("Grade") && parseInt(gradeLevel.split(" ")[1]) <= 10) {
       return 'junior-high';
     } else if (gradeLevel.includes("Grade") && parseInt(gradeLevel.split(" ")[1]) >= 11) {
@@ -148,26 +275,119 @@ const IskoProfilePage: React.FC = () => {
   ];
 
   const handleEdit = (): void => {
-    setTempProfile({...profile});
+    // Create a sanitized version of the profile where null values for dropdowns are converted to empty strings
+    const sanitizedProfile = {
+      ...profile,
+      gender: profile.gender || '',
+      region: profile.region || '',
+      grade_level: profile.grade_level || '',
+      course: profile.course || '',
+      // Ensure arrays are initialized properly
+      program_interest: Array.isArray(profile.program_interest) ? profile.program_interest : [],
+      scholarship_interest: Array.isArray(profile.scholarship_interest) ? profile.scholarship_interest : []
+    };
+    
+    setTempProfile(sanitizedProfile);
     setIsEditing(true);
+    setError(null);
   };
 
   const handleCancel = (): void => {
     setIsEditing(false);
+    setError(null);
   };
 
-  const handleSave = (): void => {
-    const educationLevel = getEducationLevel(tempProfile.grade_level);
-    let updatedProfile = {...tempProfile};
-    
-    // Handle "Others" strand selection for senior high
-    if (educationLevel === 'senior-high' && tempProfile.course === 'Others' && tempProfile.other_course) {
-      updatedProfile.course = tempProfile.other_course;
+  const handleSave = async (): Promise<void> => {
+    if (!user) {
+      setError('You must be logged in to update your profile');
+      return;
     }
     
-    setProfile(updatedProfile);
-    setIsEditing(false);
-    // Here you would typically send the updated profile to your backend
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const educationLevel = getEducationLevel(tempProfile.grade_level);
+      let updatedProfile = {...tempProfile};
+      
+      // Handle "Others" strand selection for senior high
+      if (educationLevel === 'senior-high' && tempProfile.course === 'Others' && tempProfile.other_course) {
+        updatedProfile.course = tempProfile.other_course;
+      }
+      
+      // Ensure arrays are never empty
+      if (!updatedProfile.program_interest || updatedProfile.program_interest.length === 0) {
+        updatedProfile.program_interest = []; 
+      }
+      if (!updatedProfile.scholarship_interest || updatedProfile.scholarship_interest.length === 0) {
+        updatedProfile.scholarship_interest = [];
+      }
+  
+      if (!updatedProfile.gender) {
+        updatedProfile.gender = '';
+      } else {
+        // For example, if the database expects capitalized values:
+        const validGenders = ["Male", "Female", "Non-binary", "Prefer not to say"];
+        if (!validGenders.includes(updatedProfile.gender)) {
+          updatedProfile.gender = ''; // Or set to a default value
+        }
+      }
+      
+      // Remove fields not in the profiles table
+      const { other_course, ...profileData } = updatedProfile;
+      
+      // Update profile via API
+      const response = await fetch('/api/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(profileData),
+      });
+      
+      const result = await response.json();
+
+      console.log('result from API:', result.data);
+      
+      if (!response.ok) {
+        console.error('Error updating profile:', result.error);
+        setError('Failed to update profile. Please try again.');
+        return; // Important: Exit early
+      }
+      
+      // Update local state with the returned data from the API if available
+      if (result.data) {
+        setProfile(result.data[0]);
+      } else {
+        // If the API doesn't return the updated profile, use our local version
+        setProfile(updatedProfile);
+      }
+      
+      // Show success toast instead of setting successMessage
+      showToast('Profile updated successfully!', 'success');
+      setIsEditing(false);
+      setIsLoading(false)
+      
+      // Also update auth store profile data if needed
+      if (updatedProfile.email !== user.email || updatedProfile.username !== user.username) {
+        await updateProfile({
+          email: updatedProfile.email,
+          username: updatedProfile.username
+        });
+      }
+    } catch (err) {
+      console.error('Error:', err);
+      setError('An unexpected error occurred. Please try again.');
+      // Optionally show error toast
+      showToast('Failed to update profile', 'error');
+    } finally {
+      setIsLoading(false); // Make sure to always set loading to false
+    }
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    router.push('/auth/login');
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
@@ -235,10 +455,11 @@ const IskoProfilePage: React.FC = () => {
       return (
         <select
           name={field}
-          value={tempProfile[field as keyof UserProfile] as string}
+          value={tempProfile[field as keyof UserProfile] as string || ''}
           onChange={handleChange}
           className="w-full border border-indigo-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200"
         >
+          <option value="">Select gender</option>
           {genderOptions.map(option => (
             <option key={option} value={option}>
               {option}
@@ -250,10 +471,11 @@ const IskoProfilePage: React.FC = () => {
       return (
         <select
           name={field}
-          value={tempProfile[field as keyof UserProfile] as string}
+          value={tempProfile[field as keyof UserProfile] as string || ''}
           onChange={handleChange}
           className="w-full border border-indigo-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200"
         >
+          <option value="">Select region</option>
           {regionOptions.map(option => (
             <option key={option} value={option}>
               {option}
@@ -261,14 +483,16 @@ const IskoProfilePage: React.FC = () => {
           ))}
         </select>
       );
-    } else if (field === 'grade_level') {
+    }
+    else if (field === 'grade_level') {
       return (
         <select
           name={field}
-          value={tempProfile[field as keyof UserProfile] as string}
+          value={tempProfile[field as keyof UserProfile] as string || ''}
           onChange={handleChange}
           className="w-full border border-indigo-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200"
         >
+          <option value="">Select grade level</option>
           {gradeLevelOptions.map(option => (
             <option key={option} value={option}>
               {option}
@@ -286,10 +510,11 @@ const IskoProfilePage: React.FC = () => {
           <div>
             <select
               name={field}
-              value={tempProfile[field as keyof UserProfile] as string}
+              value={tempProfile[field as keyof UserProfile] as string || ''}
               onChange={handleChange}
               className="w-full border border-indigo-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200 mb-2"
             >
+              <option value="">Select strand</option>
               {shsStrandOptions.map(option => (
                 <option key={option} value={option}>
                   {option}
@@ -315,7 +540,7 @@ const IskoProfilePage: React.FC = () => {
           <input
             type="text"
             name={field}
-            value={tempProfile[field as keyof UserProfile] as string}
+            value={tempProfile[field as keyof UserProfile] as string || ''}
             onChange={handleChange}
             className="w-full border border-indigo-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200"
             placeholder="Enter your course or program"
@@ -329,7 +554,7 @@ const IskoProfilePage: React.FC = () => {
             className="w-full border border-indigo-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200 flex flex-wrap gap-1 cursor-pointer"
             onClick={() => toggleDropdown(field)}
           >
-            {tempProfile[field as keyof UserProfile].length === 0 ? (
+            {!tempProfile[field as keyof UserProfile] || (tempProfile[field as keyof UserProfile] as string[]).length === 0 ? (
               <span className="text-gray-400">Select interests</span>
             ) : (
               (tempProfile[field as keyof UserProfile] as string[]).map(item => (
@@ -374,7 +599,7 @@ const IskoProfilePage: React.FC = () => {
             className="w-full border border-indigo-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200 flex flex-wrap gap-1 cursor-pointer"
             onClick={() => toggleDropdown(field)}
           >
-            {tempProfile[field as keyof UserProfile].length === 0 ? (
+            {!tempProfile[field as keyof UserProfile] || (tempProfile[field as keyof UserProfile] as string[]).length === 0 ? (
               <span className="text-gray-400">Select interests</span>
             ) : (
               (tempProfile[field as keyof UserProfile] as string[]).map(item => (
@@ -417,7 +642,7 @@ const IskoProfilePage: React.FC = () => {
         <input
           type="date"
           name={field}
-          value={tempProfile[field as keyof UserProfile] as string}
+          value={tempProfile[field as keyof UserProfile] as string || ''}
           onChange={handleChange}
           className="w-full border border-indigo-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200"
         />
@@ -427,10 +652,21 @@ const IskoProfilePage: React.FC = () => {
         <input
           type="number"
           name={field}
-          value={tempProfile[field as keyof UserProfile] as number}
+          value={tempProfile[field as keyof UserProfile] as number || ''}
           onChange={handleChange}
           className="w-full border border-indigo-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200"
           step={field === 'academic_gwa' ? "0.01" : "1"}
+        />
+      );
+    } else if (field === 'email' && user?.email) {
+      // Display email as read-only if it's from auth
+      return (
+        <input
+          type="text"
+          name={field}
+          value={tempProfile[field as keyof UserProfile] as string || user.email}
+          readOnly
+          className="w-full border border-indigo-300 rounded-lg px-3 py-2 bg-gray-100 cursor-not-allowed"
         />
       );
     } else {
@@ -438,9 +674,10 @@ const IskoProfilePage: React.FC = () => {
         <input
           type="text"
           name={field}
-          value={tempProfile[field as keyof UserProfile] as string}
+          value={tempProfile[field as keyof UserProfile] as string || ''}
           onChange={handleChange}
           className="w-full border border-indigo-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200"
+          placeholder={`Enter your ${formatLabel(field).toLowerCase()}`}
         />
       );
     }
@@ -448,7 +685,7 @@ const IskoProfilePage: React.FC = () => {
 
   // Helper function to display array values in view mode
   const displayArrayValue = (values: string[]) => {
-    if (values.length === 0) return "None selected";
+    if (!values || values.length === 0) return "None selected";
     return (
       <div className="flex flex-wrap gap-1">
         {values.map(value => (
@@ -468,8 +705,45 @@ const IskoProfilePage: React.FC = () => {
     return true;
   };
 
+  if (!isAuthenticated) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-600 to-indigo-800 p-4">
+        <div className="bg-white p-8 rounded-lg shadow-md text-center">
+          <h2 className="text-2xl font-bold text-indigo-700 mb-4">Access Denied</h2>
+          <p className="mb-6">You need to be logged in to view your profile.</p>
+          <button 
+            onClick={() => router.push('/auth/login')}
+            className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors"
+          >
+            Log In
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-600 to-indigo-800">
+        <div className="bg-white p-8 rounded-lg shadow-md">
+          <h2 className="text-2xl font-bold text-indigo-700 mb-4">Loading profile...</h2>
+          <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-600 to-indigo-800 flex items-center justify-center py-12 px-4">
+      {/* Toast notification */}
+      {toast.show && (
+        <Toast 
+          message={toast.message} 
+          type={toast.type} 
+          onClose={closeToast} 
+        />
+      )}
+      
       {/* Grid background overlay */}
       <div className="absolute inset-0 grid grid-cols-12 grid-rows-12 opacity-20 pointer-events-none">
         {Array.from({ length: 12 }).map((_, i) => (
@@ -497,7 +771,7 @@ const IskoProfilePage: React.FC = () => {
             <div className="absolute top-1 rounded-full h-32 w-32 bg-gradient-to-br from-indigo-500 to-blue-600 p-1 shadow-lg">
               <div className="w-full h-full rounded-full bg-white flex items-center justify-center">
                 <div className="text-4xl font-bold text-indigo-600">
-                  {profile.username.charAt(0).toUpperCase()}
+                  {profile.username ? profile.username.charAt(0).toUpperCase() : user?.email?.charAt(0).toUpperCase()}
                 </div>
               </div>
             </div>
@@ -506,8 +780,16 @@ const IskoProfilePage: React.FC = () => {
           {/* Header with padding for the avatar */}
           <div className="bg-indigo-600 pt-36 pb-6 px-6 text-white flex justify-between items-center">
             <div className="text-center w-full">
-              <h2 className="text-2xl font-bold">{profile.username}</h2>
-              <p className="text-indigo-200 mt-1">{profile.email}</p>
+              <h2 className="text-2xl font-bold">{profile.username || user?.email?.split('@')[0]}</h2>
+              <p className="text-indigo-200 mt-1">{profile.email || user?.email}</p>
+              
+              {/* Error message area (keeping this for errors only) */}
+              {error && (
+                <div className="mt-4 bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded-md relative">
+                  {error}
+                </div>
+              )}
+              
               {/* description */}
               <p className='text-indigo-300 mt-4'>
                 Update your profile details regularly to improve your scholarship matching results. Complete information helps us find the best opportunities for you!
@@ -546,7 +828,7 @@ const IskoProfilePage: React.FC = () => {
                           <div className="bg-indigo-50 px-4 py-3 rounded-lg border border-indigo-100 hover:bg-indigo-100 transition-colors duration-200">
                             {field === 'program_interest' || field === 'scholarship_interest' ? 
                               displayArrayValue(profile[field as keyof UserProfile] as string[]) : 
-                              <span>{profile[field as keyof UserProfile]}</span>
+                              <span>{profile[field as keyof UserProfile] || 'Not specified'}</span>
                             }
                           </div>
                         )}
@@ -561,14 +843,20 @@ const IskoProfilePage: React.FC = () => {
               <div className="mt-8 flex space-x-4">
                 <button
                   onClick={handleSave}
-                  className="flex-1 flex items-center justify-center bg-green-600 hover:bg-green-500 text-white py-3 px-6 rounded-lg transition-colors duration-200 font-medium"
+                  disabled={isLoading}
+                  className="flex-1 flex items-center justify-center bg-green-600 hover:bg-green-500 text-white py-3 px-6 rounded-lg transition-colors duration-200 font-medium disabled:bg-green-400"
                 >
-                  <Save size={18} className="mr-2" />
+                  {isLoading ? (
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                  ) : (
+                    <Save size={18} className="mr-2" />
+                  )}
                   Save Changes
                 </button>
                 <button
                   onClick={handleCancel}
-                  className="flex-1 flex items-center justify-center bg-gray-600 hover:bg-gray-500 text-white py-3 px-6 rounded-lg transition-colors duration-200 font-medium"
+                  disabled={isLoading}
+                  className="flex-1 flex items-center justify-center bg-gray-600 hover:bg-gray-500 text-white py-3 px-6 rounded-lg transition-colors duration-200 font-medium disabled:bg-gray-400"
                 >
                   <X size={18} className="mr-2" />
                   Cancel
@@ -576,6 +864,7 @@ const IskoProfilePage: React.FC = () => {
               </div>
             ) : (
               <button
+                onClick={handleSignOut}
                 className="mt-8 w-full flex items-center justify-center bg-red-600 hover:bg-red-500 text-white py-3 px-6 rounded-lg transition-colors duration-200 font-medium"
               >
                 <LogOut size={18} className="mr-2" />
@@ -583,11 +872,6 @@ const IskoProfilePage: React.FC = () => {
               </button>
             )}
           </div>
-        </div>
-        
-        {/* Footer */}
-        <div className="mt-6 text-center text-blue-100 text-sm">
-          <p>© 2025 IskoChatAI - Your Smart Companion for Scholarships in the Philippines</p>
         </div>
       </div>
     </div>
