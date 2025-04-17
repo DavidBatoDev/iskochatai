@@ -34,7 +34,7 @@ const Login: NextPage = () => {
       if (error) {
         setErrorMsg(error.message || 'Failed to sign in');
       } else {
-        router.push('/dashboard/chat');
+        router.push('/dashboard/chat/new');
       }
     } catch (error: any) {
       setErrorMsg(error.message || 'An unexpected error occurred');
