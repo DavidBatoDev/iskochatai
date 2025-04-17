@@ -8,10 +8,8 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY as string;
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 // GET - Fetch chat messages for a specific conversation
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     // Correctly await params before using id
     const { id } = await Promise.resolve(params);
@@ -132,10 +130,8 @@ export async function GET(
 }
 
 // POST - Send a message and get a response from Gemini
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const { id } = await Promise.resolve(params);
     const conversationId = id;
@@ -290,10 +286,8 @@ export async function POST(
 }
 
 // PATCH - Reset chat history
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     // Correctly await params before using id
     const { id } = await Promise.resolve(params);
