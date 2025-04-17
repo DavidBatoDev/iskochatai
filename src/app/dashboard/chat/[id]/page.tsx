@@ -82,14 +82,11 @@ export default function ChatPage() {
       try {
         setIsFetchingMessages(true);
         const headers = await getAuthHeaders();
-        console.log("Fetching messages for conversation:", conversationId);
-        console.log("Headers being sent:", JSON.stringify(headers));
 
         // Add user ID as query parameter as a backup
         const url = `/api/chat/${conversationId}${
           user?.id ? `?userId=${user.id}` : ""
         }`;
-        console.log("Request URL:", url);
 
         const response = await fetch(url, {
           headers,
@@ -161,8 +158,6 @@ export default function ChatPage() {
           chatId = data.id;
           // Navigate to the new conversation URL
           // router.push(`/dashboard/chat/${chatId}`);
-
-          // Instead of immediately redirecting, which causes the issue
           // Just update the URL without a full navigation reload
           window.history.pushState({}, '', `/dashboard/chat/${chatId}`);
         } else {
@@ -179,6 +174,7 @@ export default function ChatPage() {
         body: JSON.stringify({
           messages: newMessages,
           enableWebSearch: webSearchEnabled,
+          conversationId: chatId,
         }),
       });
 

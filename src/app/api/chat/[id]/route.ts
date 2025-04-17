@@ -1,4 +1,4 @@
-// app/api/chat/[id]/route.ts
+// app/api/chat/[id]/route.ts (for authenticated users)
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
@@ -13,6 +13,10 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
+    // Fix: Await params before using id
+    const { id } = await Promise.resolve(params);
+    const conversationId = id;
+    
     const headers: Record<string, string> = {};
     request.headers.forEach((value, key) => {
       headers[key] = key === 'authorization' ? 'Bearer [REDACTED]' : value;
@@ -67,8 +71,6 @@ export async function GET(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const conversationId = params.id;
-
   // Verify the user owns this conversation
   const { data: convoData, error: convoError } = await supabase
     .from('conversations')
@@ -115,8 +117,8 @@ export async function GET(
         role: 'assistant',
         message: entry.response,
         created_at: entry.created_at,
-        used_search: false, // Update this if you track search usage
-        references: [] // Update this if you track references
+        used_search: entry.used_search || false,
+        references: entry.references || []
       });
     }
   }
@@ -135,7 +137,10 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    const conversationId = params.id;
+    // Fix: Await params before using id
+    const { id } = await Promise.resolve(params);
+    const conversationId = id;
+    
     const { messages, enableWebSearch } = await request.json();
     const userId = await getUserIdFromRequest(request);
     
@@ -143,60 +148,141 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Verify the user owns this conversation
-    const { data: convoData, error: convoError } = await supabase
-      .from('conversations')
-      .select('*')
-      .eq('id', conversationId)
-      .eq('user_id', userId)
-      .single();
+    // Check if this is a new conversation or existing one
+    let actualConversationId = conversationId;
+    
+    if (conversationId === 'new') {
+      // Create a new conversation
+      const { data: newConvo, error: createError } = await supabase
+        .from('conversations')
+        .insert({
+          user_id: userId,
+          last_message: messages[messages.length - 1].content,
+          last_message_at: new Date().toISOString(),
+          started_at: new Date().toISOString(),
+          is_active: true,
+          created_at: new Date().toISOString()
+        })
+        .select()
+        .single();
 
-    if (convoError && conversationId !== 'new') {
-      return NextResponse.json({ error: 'Conversation not found' }, { status: 404 });
+      if (createError) throw createError;
+      actualConversationId = newConvo.id;
+    } else {
+      // Verify the user owns this conversation
+      const { data: convoData, error: convoError } = await supabase
+        .from('conversations')
+        .select('*')
+        .eq('id', conversationId)
+        .eq('user_id', userId)
+        .single();
+
+      if (convoError) {
+        return NextResponse.json({ error: 'Conversation not found' }, { status: 404 });
+      }
     }
 
     // Get the latest user message
     const userMessage = messages[messages.length - 1];
 
-    // Call the Gemini API
-    const geminiResponse = await fetch(`${request.nextUrl.origin}/api/gemini`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages, enableWebSearch })
-    });
+    console.log(request.nextUrl.origin)
 
-    const data = await geminiResponse.json();
-
-    // Store both user message and AI response in the same row
-    const { error: insertError } = await supabase
-      .from('chat_history')
-      .insert({
-        user_id: userId,
-        conversation_id: conversationId,
-        message: userMessage.content, // User message
-        response: data.response,      // AI response
-        created_at: new Date().toISOString()
+    try {
+      // Call the Gemini API with user ID and conversation ID
+      const geminiResponse = await fetch(`${request.nextUrl.origin}/api/gemini`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': request.headers.get('Authorization') || '',
+          'X-User-ID': userId
+        },
+        body: JSON.stringify({ 
+          messages, 
+          enableWebSearch,
+          userId,
+          conversationId: actualConversationId
+        })
       });
 
-    if (insertError) throw insertError;
+      // Check if the response is ok
+      if (!geminiResponse.ok) {
+        const errorData = await geminiResponse.json();
+        throw new Error(errorData.error || 'Failed to get response from Gemini API');
+      }
 
-    // Update the conversation's last message and timestamp
-    const { error: updateError } = await supabase
-      .from('conversations')
-      .update({
-        last_message: userMessage.content,
-        last_message_at: new Date().toISOString()
-      })
-      .eq('id', conversationId);
+      const data = await geminiResponse.json();
 
-    if (updateError && conversationId !== 'new') throw updateError;
+      // Handle case where response might be null
+      const responseText = data.response || "Sorry, I couldn't generate a response at this time.";
 
-    return NextResponse.json({
-      response: data.response,
-      usedSearch: data.usedSearch,
-      references: data.references,
-      conversationId: conversationId
-    });
+      // Store both user message and AI response in the same row
+      const { error: insertError } = await supabase
+        .from('chat_history')
+        .insert({
+          user_id: userId,
+          conversation_id: actualConversationId,
+          message: userMessage.content, // User message
+          response: responseText,       // AI response (with fallback)
+          used_search: data.usedSearch || false, // Track if search was used
+          references: data.references || [],  // Store references
+          created_at: new Date().toISOString()
+        });
+
+      if (insertError) throw insertError;
+
+      // Update the conversation's last message and timestamp
+      const { error: updateError } = await supabase
+        .from('conversations')
+        .update({
+          last_message: userMessage.content,
+          last_message_at: new Date().toISOString()
+        })
+        .eq('id', actualConversationId);
+
+      if (updateError) throw updateError;
+
+      return NextResponse.json({
+        response: responseText,
+        usedSearch: data.usedSearch || false,
+        references: data.references || [],
+        conversationId: actualConversationId
+      });
+    } catch (error: any) {
+      console.error('Error with Gemini API:', error);
+      
+      // Fallback response in case of Gemini API failure
+      const fallbackResponse = "I'm sorry, I'm having trouble connecting to my services right now. Please try again later.";
+      
+      // Still store the user message and fallback response
+      const { error: insertError } = await supabase
+        .from('chat_history')
+        .insert({
+          user_id: userId,
+          conversation_id: actualConversationId,
+          message: userMessage.content,
+          response: fallbackResponse,
+          used_search: false,
+          references: [],
+          created_at: new Date().toISOString()
+        });
+      
+      // Update the conversation's last message and timestamp
+      await supabase
+        .from('conversations')
+        .update({
+          last_message: userMessage.content,
+          last_message_at: new Date().toISOString()
+        })
+        .eq('id', actualConversationId);
+      
+      return NextResponse.json({
+        response: fallbackResponse,
+        usedSearch: false,
+        references: [],
+        conversationId: actualConversationId,
+        error: 'Service temporarily unavailable'
+      });
+    }
   } catch (error: any) {
     console.error('Error processing chat:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -209,7 +295,10 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
-    const conversationId = params.id;
+    // Fix: Await params before using id
+    const { id } = await Promise.resolve(params);
+    const conversationId = id;
+    
     const userId = await getUserIdFromRequest(request);
     
     if (!userId) {
@@ -244,6 +333,7 @@ export async function PATCH(
   }
 }
 
+// Helper function to get user ID from request
 async function getUserIdFromRequest(request: NextRequest): Promise<string | null> {
   try {
     // First check for X-User-ID header
