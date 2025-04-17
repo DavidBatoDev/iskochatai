@@ -10,13 +10,12 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 // GET - Fetch chat messages for a specific conversation
 export async function GET(
   request: NextRequest,
-  context: { params: { id: string } }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const conversationId = context.params.id;
-    
-    // Rest of your GET function remains the same
-    // ...
+    // Fix: Await params before using id
+    const { id } = await Promise.resolve(params);
+    const conversationId = id;
     
     const headers: Record<string, string> = {};
     request.headers.forEach((value, key) => {
@@ -135,13 +134,12 @@ export async function GET(
 // POST - Send a message and get a response from Gemini
 export async function POST(
   request: NextRequest,
-  context: { params: { id: string } }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const conversationId = context.params.id;
-    
-    // Rest of the POST function remains the same
-    // ...
+    // Fix: Await params before using id
+    const { id } = await Promise.resolve(params);
+    const conversationId = id;
     
     const { messages, enableWebSearch } = await request.json();
     const userId = await getUserIdFromRequest(request);
@@ -294,13 +292,12 @@ export async function POST(
 // PATCH - Reset chat history
 export async function PATCH(
   request: NextRequest,
-  context: { params: { id: string } }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const conversationId = context.params.id;
-    
-    // Rest of the PATCH function remains the same
-    // ...
+    // Fix: Await params before using id
+    const { id } = await Promise.resolve(params);
+    const conversationId = id;
     
     const userId = await getUserIdFromRequest(request);
     
