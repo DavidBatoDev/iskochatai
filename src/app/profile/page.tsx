@@ -865,7 +865,7 @@ const IskoProfilePage: React.FC = () => {
             ) : (
               <button
                 onClick={handleSignOut}
-                className="mt-8 w-full flex items-center justify-center bg-red-600 hover:bg-red-500 text-white py-3 px-6 rounded-lg transition-colors duration-200 font-medium"
+                className="cursor-pointer mt-8 w-full flex items-center justify-center bg-red-600 hover:bg-red-500 text-white py-3 px-6 rounded-lg transition-colors duration-200 font-medium"
               >
                 <LogOut size={18} className="mr-2" />
                 Sign Out

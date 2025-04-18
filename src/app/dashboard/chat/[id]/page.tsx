@@ -402,15 +402,15 @@ export default function ChatPage() {
         <header className="bg-white bg-opacity-70 backdrop-blur-md shadow-md">
           <div className="container mx-auto md:px-40 py-4 flex justify-between items-center">
             <div className="flex items-center gap-2">
-              <Link href="/dashboard">
+              <Link href="/">
                 <Tooltip delayDuration={700}>
                   <TooltipTrigger asChild>
                     <button className="text-primary cursor-pointer hover:text-yellow-300 transition p-2 rounded-full hover:bg-white hover:bg-opacity-10">
                       <ArrowLeft className="w-5 h-5" />
                     </button>
                   </TooltipTrigger>
-                  <TooltipContent className="bg-primary p-2 rounded-md shadow-lg">
-                    Back to Dashboard
+                  <TooltipContent className="text-white bg-primary p-2 rounded-md shadow-lg">
+                    Back to Homepage
                   </TooltipContent>
                 </Tooltip>
               </Link>
