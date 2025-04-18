@@ -1,33 +1,33 @@
-import { GoogleDocsLoader } from "./googleDocsLoader";
+import { createClient } from "@supabase/supabase-js";
 import { MemoryVectorStore } from "langchain/vectorstores/memory";
-import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { Document } from "langchain/document";
 import { HuggingFaceInferenceEmbeddings } from "@langchain/community/embeddings/hf";
 
-// List of Google Doc IDs that contain scholarship information
-// These should be set in environment variables or a configuration file
-const SCHOLARSHIP_DOC_IDS = (process.env.SCHOLARSHIP_DOC_IDS || "")
-  .split(",")
-  .filter((id) => id.trim() !== "");
-
-// Define the metadata type to avoid TypeScript errors
+// Define the metadata type for documents
 interface DocumentMetadata {
   title?: string;
   source?: string;
+  provider?: string;
+  link?: string;
+  id?: string;
   [key: string]: any;
 }
 
 // Initialize HuggingFace embeddings model using the inference API
-// This requires a HuggingFace API token to be set as HUGGINGFACE_API_KEY in your environment
 const embeddings = new HuggingFaceInferenceEmbeddings({
   apiKey: process.env.HUGGINGFACE_API_KEY,
   model: "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
 });
 
+// Initialize Supabase client - corrected version
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY as string;
+
 export class ScholarshipRAG {
   private vectorStore: MemoryVectorStore | null = null;
   private isInitialized: boolean = false;
   private initializationPromise: Promise<void> | null = null;
+  private supabase = createClient(supabaseUrl, supabaseKey);
 
   constructor() {
     // Immediately start initializing the RAG system
@@ -40,48 +40,14 @@ export class ScholarshipRAG {
 
       console.log("Initializing Scholarship RAG system...");
 
-      // Create documents array - first try to load from Google Docs
-      let documents: Document<DocumentMetadata>[] = [];
-
-      if (
-        SCHOLARSHIP_DOC_IDS.length > 0 &&
-        process.env.GOOGLE_CLIENT_EMAIL &&
-        process.env.GOOGLE_PRIVATE_KEY
-      ) {
-        try {
-          // Attempt to load documents from Google Docs
-          const loader = new GoogleDocsLoader({
-            documentIds: SCHOLARSHIP_DOC_IDS,
-            // Using smaller chunk size for more precise scholarship information retrieval
-            // and larger overlap to maintain context across chunks
-            chunkSize: 700,
-            chunkOverlap: 250,
-          });
-
-          documents = (await loader.load()) as Document<DocumentMetadata>[];
-          console.log(
-            `Loaded ${documents.length} document chunks from Google Docs`
-          );
-
-          // Log the first few characters of each chunk to help with debugging
-          if (documents.length > 0) {
-            documents.forEach((doc, index) => {
-              console.log(
-                `Chunk ${index + 1} preview: "${doc.pageContent.substring(
-                  0,
-                  50
-                )}..."`
-              );
-            });
-          }
-        } catch (error) {
-          console.error("Failed to load documents from Google Docs:", error);
-          // Fall back to hardcoded scholarship data
-          documents = await this.loadFallbackDocuments();
-        }
+      // Fetch scholarship data from Supabase
+      const documents = await this.loadScholarshipsFromSupabase();
+      
+      if (documents.length === 0) {
+        console.warn("No scholarship data loaded from Supabase");
+        // You might want to fall back to a default dataset here
       } else {
-        // Use fallback documents if Google Docs credentials aren't available
-        documents = await this.loadFallbackDocuments();
+        console.log(`Loaded ${documents.length} scholarship documents from Supabase`);
       }
 
       // Create vector store with HuggingFace embeddings
@@ -98,107 +64,73 @@ export class ScholarshipRAG {
     }
   }
 
-  private async loadFallbackDocuments(): Promise<Document<DocumentMetadata>[]> {
-    console.log("Loading fallback scholarship data...");
-
-    // Basic scholarship information as a fallback
-    const scholarshipData = `
-      DOST Scholarship Program
-      The Department of Science and Technology (DOST) offers scholarships to deserving students pursuing degrees in science and technology. 
+  private async loadScholarshipsFromSupabase(): Promise<Document<DocumentMetadata>[]> {
+    try {
+      console.log("Loading scholarship data from Supabase...");
       
-    THE CEO OF DOST is Gerald Berongoy, he is black
-
-      Application Process for DOST Scholarship:
-      1. Visit the DOST-SEI official website (www.sei.dost.gov.ph)
-      2. Complete the online application form during the application period (usually September to October)
-      3. Print the completed application form
-      4. Gather all required documents:
-         - Printed and signed online application form
-         - Recent 2x2 photo with name tag
-         - Birth certificate from PSA
-         - Form 138 (report card) with first to third quarter grades for Grade 12
-         - Certificate of GWA and class rank signed by the principal
-         - Parent's ITR or Certificate of Tax Exemption or Certificate of Low Income from barangay
-      5. Submit all documents to the nearest DOST regional office before the application deadline
-      6. Take the qualifying examination on the scheduled date
-      7. Wait for results announcement (usually March to April)
-      8. If qualified, complete the scholarship contract signing
+      // Fetch all scholarships from the 'scholarships' table
+      const { data: scholarships, error } = await this.supabase
+        .from('scholarships')
+        .select('*');
       
-      Requirements:
-      - Filipino citizen
-      - Good moral character
-      - Good health condition
-      - Must be a high school graduate and incoming college freshman student
-      - Must belong to the top 5% of the graduating class
-      - Must pursue priority S&T courses in identified priority S&T institutions
+      if (error) {
+        console.error("Error fetching scholarships from Supabase:", error);
+        return [];
+      }
       
-      CHED Scholarship Program
-      The Commission on Higher Education (CHED) offers various scholarship programs for Filipino students.
-      Full Merit: For incoming freshmen who belong to the top 10 of high school graduates
-      Half Merit: For incoming freshmen who belong to the upper 11-30% of high school graduates
-      Requirements:
-      - Must be a Filipino citizen
-      - Must be a high school graduate
-      - Must have general weighted average of at least 90% for Full Merit or 85% for Half Merit
-      - Must come from a family with an annual income not exceeding PHP 400,000
+      if (!scholarships || scholarships.length === 0) {
+        console.warn("No scholarships found in Supabase");
+        return [];
+      }
       
-      SM Foundation Scholarship
-      For undergraduate degrees in Engineering, Education, and Technology
-      Requirements:
-      - Must be a Filipino citizen
-      - Must have a general weighted average of at least 88%
-      - Combined annual family income must not exceed PHP 150,000
-      - Must be accepted by an accredited college/university
+      console.log(`Retrieved ${scholarships.length} scholarships from Supabase`);
       
-      Ayala Foundation Scholarship
-      For undergraduate studies in various fields
-      Requirements:
-      - Must be a Filipino citizen
-      - Must have a general weighted average of at least 90%
-      - Must be from a disadvantaged family
-      - Must be accepted by an accredited college/university
-      
-      GSIS Scholarship Program
-      For children or dependents of GSIS members
-      Requirements:
-      - Must be a child or dependent of a GSIS member
-      - Must have a general weighted average of at least 85%
-      - GSIS member must have at least 3 years of service
-      - Combined annual family income must not exceed PHP 300,000
-      
-      SSS Educational Assistance Loan
-      For SSS members or their children
-      Requirements:
-      - Member must have at least 36 monthly contributions
-      - Member must have a monthly salary credit not exceeding PHP 25,000
-      - Student must be accepted by an accredited college/university
-      
-      Metrobank Foundation Scholarship
-      For undergraduate studies in various fields
-      Requirements:
-      - Must be a Filipino citizen
-      - Must have a general weighted average of at least 90%
-      - Combined annual family income must not exceed PHP 500,000
-      - Must be accepted by an accredited college/university
-    `;
-
-    const textSplitter = new RecursiveCharacterTextSplitter({
-      chunkSize: 1000,
-      chunkOverlap: 200,
-    });
-
-    const splitDocs = await textSplitter.createDocuments([scholarshipData]);
-
-    // Add proper metadata to the documents
-    return splitDocs.map((doc) => {
-      return new Document({
-        pageContent: doc.pageContent,
-        metadata: {
-          title: "Scholarship Information",
-          source: "Internal Database",
-        } as DocumentMetadata,
+      // Transform each scholarship into a Document
+      const documents: Document<DocumentMetadata>[] = scholarships.map(scholarship => {
+        // Compile all the textual content from the scholarship
+        const pageContent = this.compileScholarshipContent(scholarship);
+        
+        // Create metadata from scholarship data
+        const metadata: DocumentMetadata = {
+          id: scholarship.id,
+          title: scholarship.title || "Untitled Scholarship",
+          provider: scholarship.provider || "Unknown Provider",
+          link: scholarship.link || "",
+          source: "Supabase Database",
+          source_type: scholarship.source_type || "database",
+          created_at: scholarship.created_at
+        };
+        
+        return new Document({
+          pageContent,
+          metadata
+        });
       });
-    });
+      
+      return documents;
+    } catch (error) {
+      console.error("Error loading scholarships from Supabase:", error);
+      return [];
+    }
+  }
+  
+  private compileScholarshipContent(scholarship: any): string {
+    // Combine all relevant scholarship information into a single text
+    const contentParts = [
+      `${scholarship.title}`,
+      `Provider: ${scholarship.provider}`,
+      `${scholarship.description || ""}`,
+      `Eligibility: ${scholarship.eligibility || ""}`,
+      `Benefits: ${scholarship.benefits || ""}`,
+      `Deadline: ${scholarship.deadline ? new Date(scholarship.deadline).toLocaleDateString() : "Ongoing"}`,
+      `${scholarship.raw_source_text || ""}`,
+      `${scholarship.summary || ""}`
+    ];
+    
+    // Filter out empty parts and join with newlines
+    return contentParts
+      .filter(part => part.trim() !== "")
+      .join("\n\n");
   }
 
   // Wait for initialization to complete
@@ -211,13 +143,21 @@ export class ScholarshipRAG {
     }
   }
 
+  // Refresh RAG system with latest data from Supabase
+  async refresh(): Promise<void> {
+    console.log("Refreshing scholarship data from Supabase...");
+    this.isInitialized = false;
+    await this.initialize();
+    console.log("Scholarship data refreshed");
+  }
+
   // Query the RAG system with a user question
   async query(
     question: string,
     userProfile?: any
   ): Promise<{
     relevantDocs: string[];
-    sources: { title: string; source: string }[];
+    sources: { id: string; title: string; provider: string; link: string }[];
   }> {
     await this.ensureInitialized();
 
@@ -288,39 +228,78 @@ export class ScholarshipRAG {
 
       console.log("Enhanced query:", enhancedQuery);
 
-      // Search for relevant documents with increased result count for better coverage
+      // Search for relevant documents
       const results = await this.vectorStore.similaritySearch(enhancedQuery, 5);
 
-      // Log the matching document chunks for debugging
-      console.log(`Found ${results.length} matching document chunks`);
-      results.forEach((doc, index) => {
-        console.log(
-          `Match ${index + 1}: ${doc.pageContent.substring(0, 100)}...`
-        );
-      });
-
-      // Extract and format the results
+      // Log the matching documents for debugging
+      console.log(`Found ${results.length} matching scholarships`);
+      
+      // Extract relevant content from the results
       const relevantDocs = results.map((doc) => doc.pageContent);
 
       // Extract source information with proper type handling
-      const sources = results.map((doc) => ({
-        title:
-          (doc.metadata as DocumentMetadata)?.title ||
-          "Scholarship Information",
-        source:
-          (doc.metadata as DocumentMetadata)?.source || "Internal Database",
-      }));
+      const sources = results.map((doc) => {
+        const metadata = doc.metadata as DocumentMetadata;
+        return {
+          id: metadata.id || "",
+          title: metadata.title || "Untitled Scholarship",
+          provider: metadata.provider || "Unknown Provider",
+          link: metadata.link || ""
+        };
+      });
 
       return {
         relevantDocs,
-        sources,
+        sources
       };
     } catch (error) {
       console.error("Error querying RAG system:", error);
       return {
         relevantDocs: [],
-        sources: [],
+        sources: []
       };
+    }
+  }
+  
+  // Method to get a specific scholarship by ID directly from Supabase
+  async getScholarshipById(id: string): Promise<any | null> {
+    try {
+      const { data, error } = await this.supabase
+        .from('scholarships')
+        .select('*')
+        .eq('id', id)
+        .single();
+        
+      if (error) {
+        console.error("Error fetching scholarship by ID:", error);
+        return null;
+      }
+      
+      return data;
+    } catch (error) {
+      console.error("Error in getScholarshipById:", error);
+      return null;
+    }
+  }
+  
+  // Method to add a new scholarship or update an existing one
+  async upsertScholarship(scholarship: any): Promise<boolean> {
+    try {
+      const { error } = await this.supabase
+        .from('scholarships')
+        .upsert(scholarship, { onConflict: 'id' });
+        
+      if (error) {
+        console.error("Error upserting scholarship:", error);
+        return false;
+      }
+      
+      // Refresh the RAG system to include the new/updated scholarship
+      await this.refresh();
+      return true;
+    } catch (error) {
+      console.error("Error in upsertScholarship:", error);
+      return false;
     }
   }
 }
