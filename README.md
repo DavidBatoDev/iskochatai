@@ -1,33 +1,47 @@
-# 🎓 IskoChatAI
+# IskoChatAI
 
-IskoChatAI is your intelligent scholarship companion built for upcoming college students in the Philippines. 🇵🇭
+Your intelligent scholarship companion for upcoming college students in the Philippines. 🇵🇭
 
-This chatbot, built using Google’s Gemini API and powerful search integrations, speaks native Filipino languages and guides students through every step of their scholarship journey—from finding programs to understanding deadlines, and even assessing which scholarships best suit their personal situation.
+This chat application uses Google’s Gemini API, Supabase-powered RAG, and Google Docs as a flexible knowledge base to provide up-to-date scholarship information in Taglish.
 
-## Demo
-https://scholarship-helper.vercel.app/
+---
 
-> Note: All the faqs is currently being compiled and is under review to ensure accurate data for upcoming college students, The import profile functionality is under construction to regulates Data Privacy
+## 🚀 Demo
+
+➡️ [Live Demo on Vercel](https://scholarship-helper.vercel.app/)
+
+---
 
 ## ✨ Features
 
-- 🗣️ **Converses in Filipino languages** – making it feel more natural and accessible for students across the Philippines.
-- 📅 **Guides scholarship applications** – from requirements to deadlines.
-- 🧠 **Smart profile matching** – assesses student profiles and recommends scholarships that match their qualifications.
-- 🔍 **Web search capability** – searches the internet for the latest scholarship news, deadlines, and announcements using Google Custom Search API.
-- 🤖 **Powered by Gemini AI** – intelligent and context-aware responses.
-- ☁️ **Cloud-hosted** – reliable and scalable infrastructure using Google Cloud Platform (GCP).
+- 🗣️ **Taglish-friendly** responses: Natural mix of Tagalog & English for Filipino students.
+- 🔎 **Retrieval-Augmented Generation (RAG)**:
+  - **Google Docs Loader**: Store unstructured scholarship data in Google Docs and sync via API.
+  - **Vector Search** in Supabase pgvector or in-memory store with multilingual embeddings.
+- 🌐 **Web Search Integration**: Custom Search JSON API to fetch the latest scholarship announcements.
+- 📋 **Profile Matching**: Personalize recommendations from user profiles stored in Supabase.
+- ⏱️ **Caching & Rate Limits**: 5‑minute revalidation for search and timeouts for API calls.
+
+---
 
 ## 🧑‍💻 Tech Stack
 
-- **Frontend**: [Next.js](https://nextjs.org/) + **TypeScript**
-- **AI Model**: [Gemini API](https://ai.google.dev/)
-- **Search Engine**: [Google Programmable Search Engine](https://programmablesearchengine.google.com/about/) + [Custom Search JSON API](https://developers.google.com/custom-search/v1/overview)
-- **Infrastructure**: [Google Cloud Platform (GCP)](https://cloud.google.com/)
+| Layer                 | Technology                                                    |
+| --------------------- | ------------------------------------------------------------- |
+| **Frontend**          | Next.js, TypeScript                                           |
+| **API / Backend**     | Next.js API Routes (Route Handlers)                           |
+| **Database**          | Supabase (Postgres + pgvector)                                |
+| **Knowledge Base**    | Google Docs via Google Docs API, fallback static data         |
+| **Embeddings**        | Multilingual model (`paraphrase-multilingual-MiniLM-L12-v2`)  |
+| **AI Model**          | Google Gemini API (gemini-2.0-flash)                          |
+| **Search Engine**     | Google Custom Search JSON API                                 |
+| **Auth & Profiles**   | Supabase Auth + Profiles table                                |
 
-## 🚀 Getting Started
+---
 
-### 1. Clone the repository
+## 🛠️ Getting Started
+
+### 1. Clone the repo
 
 ```bash
 git clone https://github.com/DavidBatoDev/iskochatai.git
@@ -40,41 +54,120 @@ cd iskochatai
 npm install
 ```
 
-### 3. Set up environment variables
+### 3. Configure environment variables
 
-Create a `.env.local` file in the root directory of your project and add the following:
+Create a `.env.local` at the project root with the following:
 
 ```env
-# Gemini API Key from Google AI Studio
+# Google Gemini API
 GEMINI_API_KEY=your_gemini_api_key
 
-# Google Programmable Search Engine
-GOOGLE_SEARCH_API_KEY=your_custom_search_api_key
-GOOGLE_SEARCH_ENGINE_ID=your_programmable_search_engine_id
+# Google Custom Search
+GOOGLE_API_KEY=your_google_api_key
+GSE_API_KEY=your_search_engine_id
+
+# Supabase (Service Role Key required for pgvector write)
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+
+# Google Docs Loader (for RAG)
+SCHOLARSHIP_DOC_IDS=docId1,docId2,...
+GOOGLE_CLIENT_EMAIL=service-account@project.iam.gserviceaccount.com
+GOOGLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----"
+
+# HuggingFace Inference (for multilingual embeddings)
+HUGGINGFACE_API_KEY=your_hf_api_token
 ```
 
->  Important: Do not share your .env.local file or commit it to Git. It contains sensitive API keys.
+> **⚠️ Security**: Do **NOT** commit `.env.local` to version control.
 
-### 4. Run the development server
+### 4. Initialize Supabase
+
+1. **Enable pgvector** extension in your Supabase SQL editor:
+
+   ```sql
+   create extension if not exists vector;
+   ```
+
+2. **Create `profiles` table** (if not existing):
+
+   ```sql
+   create table if not exists profiles (
+     id uuid primary key,
+     username text,
+     email text,
+     region text,
+     school_name text,
+     course text,
+     grade_level text,
+     program_interest text,
+     scholarship_interest text,
+     family_income numeric,
+     academic_gwa numeric,
+     gender text
+   );
+   ```
+
+3. **(Optional) Create `chat_history` table** for conversation logs.
+
+### 5. Run in development
 
 ```bash
 npm run dev
 ```
 
-Open `http://localhost:3000` in your browser to see the chatbot in action.
+Open [http://localhost:3000](http://localhost:3000) to test the chatbot.
 
-
-### 5. Build for production
-
-To build the app for production:
+### 6. Build for production
 
 ```bash
 npm run build
-```
-
-Then, you can start the production server:
-
-```bash
 npm run start
 ```
 
+---
+
+## 📂 Project Structure
+
+```
+/ (root)
+├─ app/               # Next.js App Router (Pages and API Routes)
+│  ├─ api/
+│  │  └─ gemini/      # Main API route for Gemini + RAG + search
+│  └─ (page folders)  # Route segments for UI pages
+├─ lib/
+│  └─ rag/
+│     ├─ scholarshipRAG.ts     # RAG loader & query logic
+│     └─ googleDocsLoader.ts   # Utility to sync Google Docs
+├─ public/            # Static assets
+├─ .env.local
+└─ README.md          # This file
+```
+
+---
+
+## 📖 How It Works
+
+1. **Incoming request** to `/api/gemini` with user message & flags.
+2. **Authenticate** via Supabase Auth header or custom X-User-ID.
+3. **Fetch profile** & **chat history** from Supabase.
+4. **Decide**: Use Web Search? Use RAG? Or fallback local response.
+5. **Build `systemContext`** combining profileContext, ragContext, searchContext.
+6. **Call Gemini API** with Taglish instructions & context.
+7. **Return** chatbot reply along with any reference URLs.
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please open an issue or submit a PR for:
+
+- New scholarship data sources
+- Improvements to chunking & embeddings
+- Better error handling & logging
+
+---
+
+## 📜 License
+
+This project is MIT licensed.
