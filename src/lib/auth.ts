@@ -152,9 +152,13 @@ export const useAuthStore = create<AuthState>()(
 
       // Sign out
       signOut: async () => {
-        set({ isLoading: true });
-        await supabase.auth.signOut();
-        set({ user: null, session: null, isAuthenticated: false, isLoading: false });
+        try {
+          set({ isLoading: true });
+          await supabase.auth.signOut();
+          set({ user: null, session: null, isAuthenticated: false, isLoading: false });
+        } catch (error) {
+          set({ error: error instanceof Error ? error.message : 'An unknown error occurred' });
+        }
       },
 
       // Reset password

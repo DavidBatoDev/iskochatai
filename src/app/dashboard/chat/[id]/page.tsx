@@ -22,6 +22,8 @@ import {
   GraduationCap,
   Award,
   FileQuestion,
+  Menu,
+  X,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import {
@@ -59,7 +61,7 @@ export default function ChatPage() {
   }
 
   const { user, isAuthenticated, session } = useAuthStore();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false); // Default closed on mobile
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -69,6 +71,24 @@ export default function ChatPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { setCurrentConversationId } = useConversationsStore();
+
+  // Responsive sidebar handling
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setSidebarOpen(true); // Default open on larger screens
+      } else {
+        setSidebarOpen(false); // Default closed on mobile
+      }
+    };
+
+    // Set initial state
+    handleResize();
+
+    // Listen for window resize events
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Fetch messages for the current conversation
   useEffect(() => {
@@ -190,7 +210,6 @@ export default function ChatPage() {
         router.replace(`/dashboard/chat/${data.conversationId}`, { scroll: false });
       }
 
-
       const assistantMessage: Message = {
         role: "assistant",
         content: data.response,
@@ -264,6 +283,9 @@ export default function ChatPage() {
   // Create a new chat
   const createNewChat = () => {
     router.push("/dashboard/chat/new");
+    if (window.innerWidth < 768) {
+      setSidebarOpen(false); // Close sidebar on mobile after creating new chat
+    }
   };
 
   // Delete a conversation
@@ -371,36 +393,70 @@ export default function ChatPage() {
     },
   ];
 
+  // Close sidebar when clicking outside on mobile
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (window.innerWidth < 768 && sidebarOpen) {
+        // Check if click was outside sidebar
+        const sidebar = document.getElementById('chat-sidebar');
+        const toggleButton = document.getElementById('sidebar-toggle');
+        if (sidebar && 
+            !sidebar.contains(event.target as Node) && 
+            toggleButton && 
+            !toggleButton.contains(event.target as Node)) {
+          setSidebarOpen(false);
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [sidebarOpen]);
+
   return (
-    <div className="flex h-screen bg-gradient-to-r from-blue-600 to-indigo-800">
+    <div className="flex h-screen bg-gradient-to-r from-blue-600 to-indigo-800 overflow-hidden">
+      {/* Sidebar Overlay - only visible on mobile when sidebar is open */}
+      {sidebarOpen && window.innerWidth < 768 && (
+        <div 
+          className="fixed inset-0 bg-black opacity-50 z-10"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar Component */}
-      <ChatSidebar
-        sidebarOpen={sidebarOpen}
-        // conversations={conversations}
-        // currentConversationId={conversationId}
-        createNewChat={createNewChat}
-        deleteConversation={deleteConversation}
-        // getAuthHeaders={getAuthHeaders}
-      />
+      <div
+        id="chat-sidebar"
+        className={`fixed top-0 left-0 z-20 h-full transition-all duration-300 ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } md:relative md:translate-x-0`}
+      >
+        <ChatSidebar
+          sidebarOpen={sidebarOpen}
+          createNewChat={createNewChat}
+          deleteConversation={deleteConversation}
+        />
+      </div>
 
       {/* Toggle Sidebar Button */}
       <button
+        id="sidebar-toggle"
         onClick={toggleSidebar}
-        className="absolute top-4 left-0 z-20 bg-indigo-800 hover:bg-indigo-700 text-white p-2 rounded-r-lg shadow-md transition-all duration-300"
-        style={{ left: sidebarOpen ? "16rem" : "0" }}
+        className="fixed top-4 left-4 z-30 bg-indigo-800 hover:bg-indigo-700 text-white p-2 rounded-lg shadow-md transition-all duration-300 md:hidden"
       >
         {sidebarOpen ? (
-          <ChevronLeft className="w-5 h-5" />
+          <X className="w-5 h-5" />
         ) : (
-          <ChevronRight className="w-5 h-5" />
+          <Menu className="w-5 h-5" />
         )}
       </button>
 
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col w-full">
         {/* Header */}
         <header className="bg-white bg-opacity-70 backdrop-blur-md shadow-md">
-          <div className="container mx-auto md:px-40 py-4 flex justify-between items-center">
+          <div className="container mx-auto px-4 md:px-40 py-4 flex justify-between items-center">
             <div className="flex items-center gap-2">
               <Link href="/">
                 <Tooltip delayDuration={700}>
@@ -416,29 +472,16 @@ export default function ChatPage() {
               </Link>
               <h1 className="text-xl font-bold text-primary flex items-center gap-2">
                 <Bot className="w-6 h-6 text-secondary" />
-                <div>
+                <div className="hidden xs:block">
                   Isko<span className="text-secondary">Chat</span>Ai
                 </div>
                 <span className="text-xs bg-secondary text-indigo-900 px-2 py-1 rounded-full font-medium ml-2 flex items-center">
-                  <Sparkles className="w-3 h-3 mr-1" /> TechnoQuatro
+                  <Sparkles className="w-3 h-3 mr-1" /> 
+                  <span className="hidden xs:inline">TechnoQuatro</span>
                 </span>
               </h1>
             </div>
             <div className="flex items-center gap-3">
-              {/* <Tooltip delayDuration={700}>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={resetChat}
-                    className="text-black cursor-pointer hover:text-yellow-300 transition p-2 rounded-full hover:bg-white hover:bg-opacity-10"
-                  >
-                    <RotateCcw className="w-5 h-5" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent className="bg-white p-2 rounded-md shadow-lg">
-                  Reset Chat
-                </TooltipContent>
-              </Tooltip> */}
-
               <Tooltip delayDuration={700}>
                 <TooltipTrigger asChild>
                   <Link
@@ -457,7 +500,7 @@ export default function ChatPage() {
         </header>
 
         {/* Chat Messages */}
-        <div className="flex-1 overflow-y-auto px-4 py-6 md:pl-64">
+        <div className="flex-1 overflow-y-auto px-2 sm:px-4 py-6 md:px-6">
           <div className="max-w-3xl mx-auto space-y-6">
             {/* Loading spinner when fetching messages */}
             {isFetchingMessages && (
@@ -478,7 +521,7 @@ export default function ChatPage() {
                 }`}
               >
                 <div
-                  className={`max-w-[80%] md:max-w-[80%] sm:max-w-[85%] rounded-2xl p-4 shadow-md ${
+                  className={`max-w-[95%] sm:max-w-[85%] md:max-w-[80%] rounded-2xl p-3 sm:p-4 shadow-md ${
                     message.role === "user"
                       ? "bg-white text-black rounded-br-none"
                       : "bg-blue-500 bg-opacity-10 backdrop-blur-md text-black rounded-bl-none border border-white border-opacity-20"
@@ -505,7 +548,7 @@ export default function ChatPage() {
                     )}
                   </div>
                   {message.role === "assistant" ? (
-                    <div className="markdown-content items-center text-white whitespace-pre-wrap">
+                    <div className="markdown-content items-center text-white whitespace-pre-wrap text-sm sm:text-base">
                       <ReactMarkdown
                         components={{
                           h1: ({ node, ...props }) => (
@@ -576,7 +619,7 @@ export default function ChatPage() {
                               />
                             ) : (
                               <code
-                                className="block bg-indigo-900 bg-opacity-50 text-white p-2 rounded my-2 overflow-x-auto"
+                                className="block bg-indigo-900 bg-opacity-50 text-white p-2 rounded my-2 overflow-x-auto text-xs sm:text-sm"
                                 {...props}
                               />
                             ),
@@ -586,7 +629,7 @@ export default function ChatPage() {
                       </ReactMarkdown>
                     </div>
                   ) : (
-                    <p className="text-black whitespace-pre-wrap">
+                    <p className="text-black whitespace-pre-wrap text-sm sm:text-base">
                       {message.content}
                     </p>
                   )}
@@ -639,20 +682,20 @@ export default function ChatPage() {
             {/* Empty chat placeholder with suggestions */}
             {!isFetchingMessages && messages.length === 0 && (
               <div className="flex justify-center items-center h-[400px]">
-                <div className="rounded-2xl max-w-[100%]">
-                  <div className="text-center mb-8">
-                    <Bot className="w-16 h-16 text-yellow-400 mx-auto mb-4" />
-                    <h2 className="text-2xl font-bold text-white mb-2">Welcome to IskoBot AI</h2>
-                    <p className="text-blue-100">
+                <div className="rounded-2xl max-w-[100%] px-2">
+                  <div className="text-center mb-6">
+                    <Bot className="w-12 h-12 sm:w-16 sm:h-16 text-yellow-400 mx-auto mb-4" />
+                    <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">Welcome to IskoBot AI</h2>
+                    <p className="text-blue-100 text-sm sm:text-base">
                       Your AI assistant for scholarship and college application guidance
                     </p>
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
                     {suggestions.map((suggestion, index) => (
                       <button
                         key={index}
-                        className="cursor-pointer flex items-start p-4 bg-indigo-800 bg-opacity-40 hover:bg-opacity-60 rounded-lg transition-all text-left"
+                        className="cursor-pointer flex items-start p-3 sm:p-4 bg-indigo-800 bg-opacity-40 hover:bg-opacity-60 rounded-lg transition-all text-left"
                         onClick={() => {
                           setInput(suggestion.text);
                           if (textareaRef.current) {
@@ -660,13 +703,13 @@ export default function ChatPage() {
                           }
                         }}
                       >
-                        <div className="mr-3 mt-1">{suggestion.icon}</div>
-                        <p className="text-white text-sm">{suggestion.text}</p>
+                        <div className="mr-2 sm:mr-3 mt-1">{suggestion.icon}</div>
+                        <p className="text-white text-xs sm:text-sm">{suggestion.text}</p>
                       </button>
                     ))}
                   </div>
 
-                  <p className="text-center text-xs text-blue-200 mt-6">
+                  <p className="text-center text-xs text-blue-200 mt-4 sm:mt-6">
                     You can ask any questions about scholarships, college applications, or educational opportunities
                   </p>
                 </div>
@@ -676,7 +719,7 @@ export default function ChatPage() {
             {/* Bot is typing indicator */}
             {isLoading && (
               <div className="flex justify-start">
-                <div className="bg-white bg-opacity-10 backdrop-blur-md text-black rounded-2xl rounded-bl-none border border-white border-opacity-20 p-4 max-w-[80%]">
+                <div className="bg-white bg-opacity-10 backdrop-blur-md text-black rounded-2xl rounded-bl-none border border-white border-opacity-20 p-3 sm:p-4 max-w-[80%]">
                   <div className="flex items-center gap-2 mb-2">
                     <Bot className="w-4 h-4 text-yellow-400" />
                     <span className="font-semibold text-white">IskoBot</span>
@@ -708,7 +751,7 @@ export default function ChatPage() {
         </div>
 
         {/* Input Area */}
-        <div className="bg-transparent bg-opacity-70 backdrop-blur-md p-4 md:pl-64">
+        <div className="bg-transparent bg-opacity-70 backdrop-blur-md p-2 sm:p-4">
           <div className="max-w-3xl mx-auto">
             <form
               onSubmit={(e) => {
@@ -725,21 +768,15 @@ export default function ChatPage() {
                   onChange={handleInputChange}
                   onKeyDown={handleKeyDown}
                   placeholder="Ask about scholarships, applications, deadlines..."
-                  className="w-full text-black bg-white bg-opacity-10 backdrop-blur-md overflow-hidden rounded-xl border border-white border-opacity-20 p-3 focus:outline-none resize-none min-h-12 max-h-64 placeholder-blue-200"
+                  className="w-full text-black bg-white bg-opacity-10 backdrop-blur-md overflow-hidden rounded-xl border border-white border-opacity-20 p-2 sm:p-3 focus:outline-none resize-none min-h-12 max-h-64 placeholder-blue-200 text-sm sm:text-base"
                   style={{
                     height: "48px",
                     transition: "height 0.2s ease",
                   }}
                 />
 
-                {/* Input size */}
-                {input && (
-                  <div className="absolute right-3 bottom-3 text-xs text-blue-200">
-                    {input.length} chars
-                  </div>
-                )}
-
-                <div className="flex items-center pl-4 mb-3">
+                {/* Web search toggle */}
+                <div className="flex items-center pl-3 sm:pl-4 mb-2 sm:mb-3">
                   <label
                     htmlFor="webSearchToggle"
                     className="flex items-center cursor-pointer group"
@@ -753,7 +790,7 @@ export default function ChatPage() {
                         onChange={toggleWebSearch}
                       />
                       <div
-                        className={`block w-14 h-7 rounded-full transition-colors ${
+                        className={`block w-10 sm:w-14 h-5 sm:h-7 rounded-full transition-colors ${
                           webSearchEnabled
                             ? "bg-yellow-400"
                             : "bg-gray-600 group-hover:bg-gray-500"
@@ -763,35 +800,35 @@ export default function ChatPage() {
                           <span
                             className={`text-indigo-900 font-medium ${
                               webSearchEnabled ? "opacity-100" : "opacity-0"
-                            }`}
+                            } hidden sm:inline`}
                           >
                             ON
                           </span>
                           <span
                             className={`text-white font-medium ${
                               !webSearchEnabled ? "opacity-100" : "opacity-0"
-                            }`}
+                            } hidden sm:inline`}
                           >
                             OFF
                           </span>
                         </div>
                       </div>
                       <div
-                        className={`absolute left-1 top-1 bg-white w-5 h-5 rounded-full shadow-md transition transform ${
-                          webSearchEnabled ? "translate-x-7" : ""
+                        className={`absolute left-1 top-1 bg-white w-3 h-3 sm:w-5 sm:h-5 rounded-full shadow-md transition transform ${
+                          webSearchEnabled ? "translate-x-5 sm:translate-x-7" : ""
                         } flex items-center justify-center`}
                       >
                         <Globe
-                          className={`w-3 h-3 ${
+                          className={`w-2 h-2 sm:w-3 sm:h-3 ${
                             webSearchEnabled
                               ? "text-yellow-500"
                               : "text-gray-500"
                           }`}
                         />
-                      </div>
+                        </div>
                     </div>
-                    <div className="ml-2 text-black text-sm flex items-center">
-                      Enable Web Search
+                    <div className="ml-2 text-black text-xs sm:text-sm flex items-center">
+                      Web Search
                     </div>
                   </label>
                 </div>
@@ -801,9 +838,9 @@ export default function ChatPage() {
                   <TooltipTrigger asChild>
                     <button
                       type="submit"
-                      className="rounded-full p-3 bg-yellow-400 hover:bg-yellow-300 text-indigo-900 transition duration-200 cursor-pointer flex items-center justify-center min-w-12 min-h-12"
+                      className="rounded-full p-2 sm:p-3 bg-yellow-400 hover:bg-yellow-300 text-indigo-900 transition duration-200 cursor-pointer flex items-center justify-center min-w-10 min-h-10 sm:min-w-12 sm:min-h-12"
                     >
-                      <Send className="w-5 h-5" />
+                      <Send className="w-4 h-4 sm:w-5 sm:h-5" />
                     </button>
                   </TooltipTrigger>
                   <TooltipContent className="bg-white p-2 rounded-md shadow-lg">
@@ -814,13 +851,13 @@ export default function ChatPage() {
                 <button
                   type="submit"
                   disabled
-                  className="rounded-full p-3 bg-gray-500 cursor-not-allowed flex items-center justify-center min-w-12 min-h-12"
+                  className="rounded-full p-2 sm:p-3 bg-gray-500 cursor-not-allowed flex items-center justify-center min-w-10 min-h-10 sm:min-w-12 sm:min-h-12"
                 >
-                  <Send className="w-5 h-5" />
+                  <Send className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
               )}
             </form>
-            <p className="text-xs mt-2 text-center text-white">
+            <p className="text-xs mt-2 text-center text-white px-2">
               IskoBot might not have all the answers. Please verify important
               information from official sources.
             </p>

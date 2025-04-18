@@ -386,6 +386,7 @@ const IskoProfilePage: React.FC = () => {
   };
 
   const handleSignOut = async () => {
+    console.log('Signing out...');
     await signOut();
     router.push('/signin');
   };
@@ -801,7 +802,7 @@ const IskoProfilePage: React.FC = () => {
                 className="absolute top-4 right-4 flex items-center bg-indigo-500 hover:bg-indigo-400 text-white py-2 px-4 rounded-lg transition-colors duration-200"
               >
                 <Edit3 size={16} className="mr-2" />
-                Edit Profile
+                <span className='hidden md:flex'>Edit Profile</span>
               </button>
             )}
           </div>
