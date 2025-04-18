@@ -34,10 +34,12 @@ interface UserProfile {
   region?: string;
 }
 
-// Define interfaces for RAG results to fix TypeScript errors
+// Updated interface for RAG sources to match the new Supabase implementation
 interface RagSource {
+  id: string;
   title: string;
-  source: string;
+  provider: string;
+  link: string;
 }
 
 interface RagResults {
@@ -622,6 +624,7 @@ export async function POST(request: NextRequest) {
         data.candidates?.[0]?.content?.parts?.[0]?.text ||
         "Sorry, I couldn't process your request at the moment. Please try again.";
 
+      // Format references based on the source type
       const references = [
         ...(usedSearch
           ? searchResults.map((result) => ({
@@ -631,8 +634,10 @@ export async function POST(request: NextRequest) {
           : []),
         ...(usedRag
           ? ragResults.sources.map((source) => ({
-              title: source.title,
-              url: source.source,
+              title: source.title || `${source.provider} Scholarship`,
+              url: source.link || "#",
+              provider: source.provider,
+              id: source.id
             }))
           : []),
       ];
