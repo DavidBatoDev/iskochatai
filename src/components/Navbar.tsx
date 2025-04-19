@@ -60,7 +60,7 @@ const Navbar = () => {
               onClick={(e) => scrollToSection(e, "scholarships")}
               className="text-gray-700 hover:text-primary transition-colors relative after:absolute after:bottom-[-5px] after:left-0 after:h-[2px] after:w-0 after:bg-primary after:transition-all after:duration-300 hover:after:w-full"
             >
-              Scholarships
+              Featured
             </a>
             <a
               href="#faqs"
