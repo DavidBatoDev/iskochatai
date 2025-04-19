@@ -381,7 +381,7 @@ export default function ChatPage() {
     },
     {
       icon: <GraduationCap className="w-5 h-5 text-yellow-400" />,
-      text: "How do I apply for admission to UP Diliman?",
+      text: "How do I apply for SM Scholarship?",
     },
     {
       icon: <Award className="w-5 h-5 text-yellow-400" />,
@@ -389,7 +389,7 @@ export default function ChatPage() {
     },
     {
       icon: <FileQuestion className="w-5 h-5 text-yellow-400" />,
-      text: "When is the UPCAT application deadline?",
+      text: "When is the DOST application deadline?",
     },
   ];
 

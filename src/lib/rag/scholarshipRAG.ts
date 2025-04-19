@@ -1,3 +1,4 @@
+// app/lib/rag/scholarshipRAG.ts
 import { createClient } from "@supabase/supabase-js";
 import { MemoryVectorStore } from "langchain/vectorstores/memory";
 import { Document } from "langchain/document";

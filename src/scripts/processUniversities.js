@@ -1,4 +1,4 @@
-import { processAllMissingEmbeddings } from '../lib/generateScholarshipEmbeddings.js';
+import { processAllMissingEmbeddings } from '../lib/generateUniversityEmbeddings.js';
 
 processAllMissingEmbeddings()
   .then(() => {

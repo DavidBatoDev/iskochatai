@@ -29,7 +29,7 @@ const Hero = () => {
           <div className="text-white animate-fade-up">
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
               Your Smart Companion for{" "}
-              <span className="text-secondary">Scholarships</span> in the
+              <span className="text-secondary">Scholarships and College Application</span> in the
               Philippines
             </h1>
             <p className="text-lg md:text-xl mb-8 opacity-90">
@@ -50,7 +50,7 @@ const Hero = () => {
                 size="lg"
               >
                 <Search className="w-5 h-5 mr-2" />
-                Import Profile by Logging in
+                Personalized Chats!
               </Button>
               </Link>
             </div>
@@ -66,7 +66,7 @@ const Hero = () => {
                   <h3 className="text-xl font-semibold text-white">
                     IskoChatAI
                   </h3>
-                  <p className="text-white/70">Your scholarship assistant</p>
+                  <p className="text-white/70">Your scholarship/college assistant</p>
                 </div>
               </div>
 
@@ -75,9 +75,9 @@ const Hero = () => {
                 <TypeAnimation
                   sequence={[
                     0,
-                    "Kamusta! I'm IskoChatAI. How can I help you with scholarships today?",
-                    1000, // Wait for 1 second before showing the user message
-                    () => setShowUserMessage(true), // Immediately trigger user message when typing completes
+                    "Kamusta! I'm IskoChatAI. Need help finding scholarships or universities in the Philippines?",
+                    1000,
+                    () => setShowUserMessage(true),
                   ]}
                   wrapper="p"
                   speed={80}
@@ -91,9 +91,9 @@ const Hero = () => {
                 <div className="bg-white/90 p-4 rounded-lg rounded-br-none mb-4 ml-auto max-w-[90%]">
                   <TypeAnimation
                     sequence={[
-                      "Anong mga Scholarship ang goods para sa mga engineering?",
-                      1000, // Wait for 1 second before showing the AI response
-                      () => setShowAiResponse(true), // Immediately trigger AI response when typing completes
+                      "Anong scholarship at university ang best para sa engineering students?",
+                      1000,
+                      () => setShowAiResponse(true),
                     ]}
                     wrapper="p"
                     speed={80}
@@ -108,7 +108,7 @@ const Hero = () => {
                 <div className="bg-white/10 p-4 rounded-lg rounded-bl-none mr-auto max-w-[90%]">
                   <TypeAnimation
                     sequence={[
-                      "Great question! Para sa mga engineering students, here are some top options: \n\n\u00A0\u00A0\u00A0• DOST-SEI Engineering Scholarship\n\u00A0\u00A0\u00A0• SM Engineering Scholarship\n\u00A0\u00A0\u00A0• CHED Merit Scholarship \n\n Would you like to know more about any of these programs?",
+                      `Nice choice! Para sa mga engineering students, eto ang mga top scholarships at universities:\n\n📚 Scholarships:\n• DOST-SEI Engineering Scholarship\n• SM Foundation Scholarship\n• CHED Merit Scholarship\n\n🏫 Universities:\n• University of the Philippines - Diliman (UPD)\n• Mapúa University\n• De La Salle University (DLSU)\n• Polytechnic University of the Philippines (PUP)\n\nGusto mo bang malaman ang eligibility o deadlines ng mga ito?`,
                       1000,
                     ]}
                     wrapper="p"
@@ -119,6 +119,7 @@ const Hero = () => {
                   />
                 </div>
               )}
+
             </div>
           </div>
         </div>
