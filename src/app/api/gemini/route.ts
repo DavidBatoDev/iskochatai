@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { scholarshipRAG } from "@/lib/rag/scholarshipRAG";
+import { universityRAG } from "@/lib/rag/universityRAG"; // Import the universityRAG
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_API_URL =
@@ -35,16 +36,29 @@ interface UserProfile {
 }
 
 // Updated interface for RAG sources to match the new Supabase implementation
-interface RagSource {
+interface ScholarshipRagSource {
   id: string;
   title: string;
   provider: string;
   link: string;
 }
 
-interface RagResults {
+interface UniversityRagSource {
+  id: string;
+  name: string;
+  type: string;
+  location: string;
+  website_url: string;
+}
+
+interface ScholarshipRagResults {
   relevantDocs: string[];
-  sources: RagSource[];
+  sources: ScholarshipRagSource[];
+}
+
+interface UniversityRagResults {
+  relevantDocs: string[];
+  sources: UniversityRagSource[];
 }
 
 // Function to perform web search using Google Custom Search
@@ -52,7 +66,11 @@ async function performWebSearch(
   query: string,
   userProfile?: UserProfile
 ): Promise<SearchResult[]> {
-  let enhancedQuery = `${query} philippines scholarship`;
+  // Determine if this is a university query to enhance the search query properly
+  const isUniversityQuery = isUniversityRelatedQuery(query);
+  let enhancedQuery = isUniversityQuery 
+    ? `${query} philippines university college` 
+    : `${query} philippines scholarship`;
 
   if (userProfile) {
     if (userProfile.region) {
@@ -185,19 +203,7 @@ function generateLocalResponse(
   let response =
     "I'm sorry, but I'm currently having trouble connecting to my knowledge services. ";
 
-  const scholarshipKeywords = [
-    "scholarship",
-    "tuition",
-    "financial aid",
-    "iskolarship",
-    "study",
-    "school",
-  ];
-  const hasScholarshipKeyword = scholarshipKeywords.some((keyword) =>
-    query.toLowerCase().includes(keyword.toLowerCase())
-  );
-
-  if (hasScholarshipKeyword) {
+  if (isScholarshipQuery(query)) {
     response +=
       "For scholarship inquiries, I recommend checking the following resources:\n\n";
     response += "1. CHED Scholarships: https://ched.gov.ph/scholarships/\n";
@@ -206,6 +212,19 @@ function generateLocalResponse(
 
     if (userProfile?.school_name) {
       response += `Since you're associated with ${userProfile.school_name}, you might want to check their specific scholarship offerings as well.`;
+    } else {
+      response +=
+        "When our services are back online, I can provide more specific information tailored to your needs.";
+    }
+  } else if (isUniversityRelatedQuery(query)) {
+    response +=
+      "For university and college inquiries, I recommend checking the following resources:\n\n";
+    response += "1. CHED (Commission on Higher Education): https://ched.gov.ph/\n";
+    response += "2. University directories like FindUniversity: https://www.finduniversity.ph/\n";
+    response += "3. Specific university websites\n\n";
+    
+    if (userProfile?.program_interest) {
+      response += `Since you're interested in ${userProfile.program_interest}, you might want to research universities that specialize in this field.`;
     } else {
       response +=
         "When our services are back online, I can provide more specific information tailored to your needs.";
@@ -241,17 +260,86 @@ function isScholarshipQuery(query: string): boolean {
     "college fund",
     "merit",
     "DOST",
-    "CHED",
-    "education commission",
+    "CHED scholarship",
     "SM foundation",
-    "ayala",
-    "GSIS",
+    "ayala scholarship",
+    "GSIS scholarship",
     "SSS loan",
-    "metrobank",
+    "metrobank scholarship",
     "education loan",
   ];
 
   return scholarshipKeywords.some((keyword) =>
+    query.toLowerCase().includes(keyword.toLowerCase())
+  );
+}
+
+// Determine if a query is university/college related
+function isUniversityRelatedQuery(query: string): boolean {
+  const universityKeywords = [
+    "university",
+    "college",
+    "school",
+    "campus",
+    "department",
+    "faculty",
+    "professor",
+    "course",
+    "program",
+    "major",
+    "minor",
+    "degree",
+    "bachelor",
+    "master",
+    "doctorate",
+    "PhD",
+    "admission",
+    "enrollment",
+    "register",
+    "application process",
+    "requirements",
+    "tuition fee",
+    "dormitory",
+    "entrance exam",
+    "UP diliman",
+    "ADMU",
+    "DLSU",
+    "UST",
+    "FEU",
+    "PUP",
+    "mapua",
+    "siliman",
+    "ateneo",
+    "la salle",
+    "pamantasan",
+    "kolehiyo",
+    "unibersidad",
+    "kurso",
+    "programa",
+    "admission test",
+    "UPCAT",
+    "ACET",
+    "USTET",
+    "DCAT",
+    "freshmen",
+    "transferee",
+    "shifting",
+    "units",
+    "GWA",
+    "grades",
+    "semester",
+    "trimester",
+    "quadrimester",
+    "dean's list",
+    "honors",
+    "thesis",
+    "dissertation",
+    "accreditation",
+    "CHED",
+    "Commission on Higher Education"
+  ];
+
+  return universityKeywords.some((keyword) =>
     query.toLowerCase().includes(keyword.toLowerCase())
   );
 }
@@ -439,24 +527,48 @@ export async function POST(request: NextRequest) {
       usedSearch = searchResults.length > 0;
     }
 
+    // Check if query is about scholarships or universities
     const isScholarship = isScholarshipQuery(latestUserMessage);
-    let ragResults: RagResults = { relevantDocs: [], sources: [] };
-    let usedRag = false;
+    const isUniversity = isUniversityRelatedQuery(latestUserMessage);
+    
+    let scholarshipRagResults: ScholarshipRagResults = { relevantDocs: [], sources: [] };
+    let universityRagResults: UniversityRagResults = { relevantDocs: [], sources: [] };
+    let usedScholarshipRag = false;
+    let usedUniversityRag = false;
 
+    // Use ScholarshipRAG for scholarship queries
     if (isScholarship) {
       try {
         console.log("Using RAG for scholarship query");
-        ragResults = await scholarshipRAG.query(
+        scholarshipRagResults = await scholarshipRAG.query(
           latestUserMessage,
           userProfile || undefined
         );
-        usedRag = ragResults.relevantDocs.length > 0;
+        usedScholarshipRag = scholarshipRagResults.relevantDocs.length > 0;
         console.log(
-          "RAG results:",
-          usedRag ? "Found relevant docs" : "No relevant docs found"
+          "Scholarship RAG results:",
+          usedScholarshipRag ? "Found relevant docs" : "No relevant docs found"
         );
       } catch (error) {
-        console.error("Error using RAG:", error);
+        console.error("Error using Scholarship RAG:", error);
+      }
+    }
+
+    // Use UniversityRAG for university/college queries
+    if (isUniversity) {
+      try {
+        console.log("Using RAG for university query");
+        universityRagResults = await universityRAG.query(
+          latestUserMessage,
+          userProfile || undefined
+        );
+        usedUniversityRag = universityRagResults.relevantDocs.length > 0;
+        console.log(
+          "University RAG results:",
+          usedUniversityRag ? "Found relevant docs" : "No relevant docs found"
+        );
+      } catch (error) {
+        console.error("Error using University RAG:", error);
       }
     }
 
@@ -474,14 +586,24 @@ export async function POST(request: NextRequest) {
       searchContext = `\n\nNo relevant information was found from the web. Please provide an answer based on your knowledge.`;
     }
 
-    let ragContext = "";
-    if (usedRag && ragResults.relevantDocs.length > 0) {
-      ragContext = `\n\nI've found specific scholarship information that's relevant to this query:\n\n`;
-      ragResults.relevantDocs.forEach((doc, index) => {
-        ragContext += `Information ${index + 1}:\n${doc}\n\n`;
+    let scholarshipRagContext = "";
+    if (usedScholarshipRag && scholarshipRagResults.relevantDocs.length > 0) {
+      scholarshipRagContext = `\n\nI've found specific scholarship information that's relevant to this query:\n\n`;
+      scholarshipRagResults.relevantDocs.forEach((doc, index) => {
+        scholarshipRagContext += `Information ${index + 1}:\n${doc}\n\n`;
       });
-      ragContext += `Use this scholarship-specific information to provide a precise and helpful answer.`;
-      ragContext += `Be sure to mention eligibility requirements and application processes where appropriate.`;
+      scholarshipRagContext += `Use this scholarship-specific information to provide a precise and helpful answer.`;
+      scholarshipRagContext += `Be sure to mention eligibility requirements and application processes where appropriate.`;
+    }
+
+    let universityRagContext = "";
+    if (usedUniversityRag && universityRagResults.relevantDocs.length > 0) {
+      universityRagContext = `\n\nI've found specific university/college information that's relevant to this query:\n\n`;
+      universityRagResults.relevantDocs.forEach((doc, index) => {
+        universityRagContext += `Information ${index + 1}:\n${doc}\n\n`;
+      });
+      universityRagContext += `Use this university-specific information to provide a precise and helpful answer.`;
+      universityRagContext += `Be sure to mention admission requirements, programs offered, and application processes where appropriate.`;
     }
 
     let profileContext = "";
@@ -525,14 +647,18 @@ export async function POST(request: NextRequest) {
         "\n\nTailor your responses to be more relevant to this user's profile when appropriate.";
     }
 
-    const systemContext = `You are IskoBot, a helpful assistant specializing in scholarship and college application information for students. 
-    Your goal is to provide accurate, concise, and helpful information about scholarships, application processes, deadlines, and required documents.
+    const systemContext = `You are IskoBot, a helpful assistant specializing in scholarship and college/university information for Filipino students. 
+    Your goal is to provide accurate, concise, and helpful information about scholarships, universities, admission processes, application deadlines, and required documents.
     Always be encouraging and supportive of students' educational goals. You should answer the questions in a friendly and informative manner. Try to answer the queries as much as possible in taglish language.
     Do not provide any personal opinions or unverified information.
+    
     If the user asks about a specific scholarship, provide details about it, including eligibility criteria, application process, and deadlines.
-    If they ask about something that is not related to scholarships, politely redirect them to the topic of scholarships.
+    If the user asks about a specific university or college, provide information about its programs, admission requirements, campus, and notable features.
+    If they ask about something that is not related to scholarships or education, politely redirect them to educational topics.
+    
     ${searchContext}
-    ${ragContext}
+    ${scholarshipRagContext}
+    ${universityRagContext}
     ${profileContext}
     
     ${
@@ -541,13 +667,18 @@ export async function POST(request: NextRequest) {
         : ""
     }
     ${
-      usedRag
+      usedScholarshipRag
         ? "IMPORTANT: Begin your response with '[Scholarship Database Used]' and then continue with your answer."
         : ""
     }
     ${
-      usedSearch && usedRag
-        ? "IMPORTANT: Begin your response with '[Web Search & Scholarship Database Used]' and then continue with your answer."
+      usedUniversityRag
+        ? "IMPORTANT: Begin your response with '[University Database Used]' and then continue with your answer."
+        : ""
+    }
+    ${
+      (usedSearch && usedScholarshipRag) || (usedSearch && usedUniversityRag)
+        ? "IMPORTANT: Begin your response with '[Web Search & Database Used]' and then continue with your answer."
         : ""
     }`;
 
@@ -630,13 +761,25 @@ export async function POST(request: NextRequest) {
           ? searchResults.map((result) => ({
               title: result.title,
               url: result.link,
+              type: "web"
             }))
           : []),
-        ...(usedRag
-          ? ragResults.sources.map((source) => ({
+        ...(usedScholarshipRag
+          ? scholarshipRagResults.sources.map((source) => ({
               title: source.title || `${source.provider} Scholarship`,
               url: source.link || "#",
               provider: source.provider,
+              id: source.id,
+              type: "scholarship"
+            }))
+          : []),
+        ...(usedUniversityRag
+          ? universityRagResults.sources.map((source) => ({
+              title: source.name || "University",
+              url: source.website_url || "#",
+              location: source.location,
+              type: "university",
+              university_type: source.type,
               id: source.id
             }))
           : []),
@@ -645,7 +788,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         response: responseText,
         usedSearch: usedSearch,
-        usedRag: usedRag,
+        usedScholarshipRag: usedScholarshipRag,
+        usedUniversityRag: usedUniversityRag,
         references: references,
         isAuthenticated: isAuthenticated,
       });
@@ -660,7 +804,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         response: fallbackResponse,
         usedSearch: false,
-        usedRag: false,
+        usedScholarshipRag: false,
+        usedUniversityRag: false,
         references: [],
         isAuthenticated: isAuthenticated,
         error: error.message,
@@ -674,7 +819,8 @@ export async function POST(request: NextRequest) {
         response:
           "I apologize, but I'm experiencing technical difficulties right now. Please try again later.",
         usedSearch: false,
-        usedRag: false,
+        usedScholarshipRag: false,
+        usedUniversityRag: false,
         references: [],
         error: error.message || "Failed to process request",
       },
