@@ -57,6 +57,38 @@ const faqs = [
     question: "Is there a mobile app for IskoChatAI?",
     answer: "Currently, IskoChatAI is available as a web application. We are exploring the possibility of developing a mobile app in the future to enhance accessibility. For now, you can access IskoChatAI through any mobile browser."
   },
+  {
+    question: "Can IskoChatAI recommend universities as well?",
+    answer: "Yes! IskoChatAI can help you discover top universities in the Philippines based on your preferred course, location, budget, and even available scholarships. You can ask questions like 'What are the best universities for engineering in Luzon?' or 'Which schools offer full scholarships for IT programs?'"
+  },
+  {
+    question: "Does IskoChatAI cover both public and private institutions?",
+    answer: "Absolutely. We provide information about scholarships and programs offered by both public universities like UP, PUP, and state colleges, as well as private institutions like Ateneo, La Salle, Mapua, and many more."
+  },
+  {
+    question: "Can I save my profile on IskoChatAI?",
+    answer: "Yes. If you log in, you can create and save a profile that allows IskoChatAI to give you more personalized recommendations based on your academic history, interests, and scholarship goals."
+  },
+  {
+    question: "Can IskoChatAI help me choose a course?",
+    answer: "Definitely. If you're unsure about what course to take, you can ask IskoChatAI for guidance based on your interests, future job goals, and scholarship availability. We can also suggest in-demand courses in the Philippines and globally."
+  },
+  {
+    question: "Is IskoChatAI available 24/7?",
+    answer: "Yes! IskoChatAI is an AI-powered assistant available 24/7 to answer your questions, guide your scholarship search, and help you explore universities anytime, anywhere."
+  },
+  {
+    question: "Does IskoChatAI support Filipino language?",
+    answer: "Oo naman! You can chat with IskoChatAI in Filipino, English, or Taglish. We designed it to feel like you’re talking to a friendly, helpful upperclassman who understands you."
+  },
+  {
+    question: "How often is the data updated?",
+    answer: "We update our scholarship and university listings regularly. IskoChatAI uses a smart retrieval system that fetches the most recent data from official sources and trusted partners in real time."
+  },
+  {
+    question: "Can I use IskoChatAI even if I'm already in college?",
+    answer: "Of course! IskoChatAI is not just for incoming freshmen. We also help current college students and even graduating students find scholarships for continuing education, internships, and graduate studies."
+  }
 ];
 
 const FAQs = () => {
