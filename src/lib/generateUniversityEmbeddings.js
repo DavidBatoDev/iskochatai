@@ -191,7 +191,7 @@ export async function semanticSearchUniversities(query, limit = 5) {
     const { data, error } = await supabase
       .rpc('match_universities', {
         query_embedding: queryEmbedding,
-        match_threshold: 0.5, // Adjust as needed
+        match_threshold: 0.2, // Adjust as needed
         match_count: limit
       });
     
