@@ -99,7 +99,8 @@ export class UniversityRAG {
           website_url: university.website_url || "",
           source: "Supabase Database",
           source_type: "database",
-          created_at: university.created_at
+          created_at: university.created_at,
+          extra_data: university.extra_data || {} // Include any extra data if available
         };
         
         return new Document({
@@ -129,7 +130,8 @@ export class UniversityRAG {
       `Website: ${university.website_url || ""}`,
       `Contact Information: ${university.contact_info || ""}`,
       `Ranking: ${university.ranking || ""}`,
-      `Accreditation: ${university.accreditation || ""}`
+      `Accreditation: ${university.accreditation || ""}`,
+      `Extra Data: ${university.extra_data ? JSON.stringify(university.extra_data) : ""}` // Include extra data if available
     ];
     
     // Filter out empty parts and join with newlines
