@@ -24,6 +24,19 @@ export async function generateAndStoreEmbedding(university) {
   try {
     console.log(`Generating embedding for university: ${university.name}`);
 
+    const extraDataFormatted = university.extra_data ? 
+    Object.entries(university.extra_data)
+      .map(([key, value]) => {
+        // Format arrays as comma-separated lists
+        const formattedValue = Array.isArray(value) ? value.join(', ') : value;
+        // Convert key from snake_case or camelCase to Title Case for better readability
+        const formattedKey = key.replace(/_/g, ' ').replace(/([A-Z])/g, ' $1')
+          .replace(/\b\w/g, c => c.toUpperCase());
+        return `${formattedKey}: ${formattedValue}`;
+      })
+      .join('\n') + 
+      `\n\nFull Data: ${JSON.stringify(university.extra_data)}` : "";
+
     // Combine relevant fields to create the text for embedding
     const textToEmbed = [
       university.name || "",
@@ -36,7 +49,7 @@ export async function generateAndStoreEmbedding(university) {
       `Notable Features: ${university.notable_features || ""}`,
       `Ranking: ${university.ranking || ""}`,
       `Accreditation: ${university.accreditation || ""}`,
-      university.extra_data ? `Extra Data: ${JSON.stringify(university.extra_data)}` : ""
+      extraDataFormatted,
     ]
       .filter(text => text.trim() !== "")
       .join("\n\n");
