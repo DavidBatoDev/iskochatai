@@ -99,7 +99,8 @@ export class ScholarshipRAG {
           link: scholarship.link || "",
           source: "Supabase Database",
           source_type: scholarship.source_type || "database",
-          created_at: scholarship.created_at
+          created_at: scholarship.created_at,
+          extra_data: scholarship.extra_data || {},
         };
         
         return new Document({
@@ -125,7 +126,8 @@ export class ScholarshipRAG {
       `Benefits: ${scholarship.benefits || ""}`,
       `Deadline: ${scholarship.deadline ? new Date(scholarship.deadline).toLocaleDateString() : "Ongoing"}`,
       `${scholarship.raw_source_text || ""}`,
-      `${scholarship.summary || ""}`
+      `${scholarship.summary || ""}`,
+      `extra_info: ${JSON.stringify(scholarship.extra_data || {})}`,
     ];
     
     // Filter out empty parts and join with newlines

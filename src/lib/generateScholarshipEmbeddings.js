@@ -24,6 +24,21 @@ export async function generateAndStoreEmbedding(scholarship) {
   try {
     console.log(`Generating embedding for scholarship: ${scholarship.title}`);
 
+    const extraDataFormatted = scholarship.extra_data ? 
+    Object.entries(scholarship.extra_data)
+      .map(([key, value]) => {
+        // Format arrays as comma-separated lists
+        const formattedValue = Array.isArray(value) ? value.join(', ') : value;
+        // Convert key from snake_case or camelCase to Title Case for better readability
+        const formattedKey = key.replace(/_/g, ' ').replace(/([A-Z])/g, ' $1')
+          .replace(/\b\w/g, c => c.toUpperCase());
+        return `${formattedKey}: ${formattedValue}`;
+      })
+      .join('\n') + 
+      `\n\nFull Data: ${JSON.stringify(scholarship.extra_data)}` : "";
+
+    console.log("Extra Data Formatted:", extraDataFormatted);
+
     // Combine relevant fields to create the text for embedding
     const textToEmbed = [
       scholarship.title || "",
@@ -33,8 +48,7 @@ export async function generateAndStoreEmbedding(scholarship) {
       `Benefits: ${scholarship.benefits || ""}`,
       scholarship.raw_source_text || "",
       scholarship.summary || "",
-      // also embed the extra_data field if it exists
-      scholarship.extra_data ? `Extra Data: ${JSON.stringify(scholarship.extra_data)}` : ""
+      extraDataFormatted,
     ]
       .filter(text => text.trim() !== "")
       .join("\n\n");
@@ -176,7 +190,7 @@ export async function semanticSearchScholarships(query, limit = 5) {
     const { data, error } = await supabase
       .rpc('match_scholarships', {
         query_embedding: queryEmbedding,
-        match_threshold: 0.3, // Adjust as needed
+        match_threshold: 0.2, // Adjust as needed
         match_count: limit
       });
     
