@@ -222,7 +222,7 @@ export default function ChatPage() {
               <div>
                 Isko<span className="text-secondary">Chat</span>Ai
               </div>
-              <span className="text-xs bg-secondary text-indigo-900 px-2 py-1 rounded-full font-medium ml-2 flex items-center">
+              <span className="hidden md:flex text-xs bg-secondary text-indigo-900 px-2 py-1 rounded-full font-medium ml-2 items-center">
                 <Sparkles className="w-3 h-3 mr-1" /> TechnoQuatro
               </span>
             </h1>
@@ -282,7 +282,7 @@ export default function ChatPage() {
                   )}
                 </div>
                 {message.role === "assistant" ? (
-                  <div className="markdown-content items-center text-white whitespace-pre-wrap">
+                  <div className="markdown-content items-center text-xs md:text-sm text-white whitespace-pre-wrap">
                     <ReactMarkdown
                       components={{
                         h1: ({ node, ...props }) => (
@@ -363,7 +363,7 @@ export default function ChatPage() {
                     </ReactMarkdown>
                   </div>
                 ) : (
-                  <p className="text-black whitespace-pre-wrap">
+                  <p className="text-black text-xs md:text-sm whitespace-pre-wrap">
                     {message.content}
                   </p>
                 )}
@@ -462,7 +462,7 @@ export default function ChatPage() {
                 onChange={handleInputChange}
                 onKeyDown={handleKeyDown}
                 placeholder="Ask about scholarships, applications, deadlines..."
-                className="w-full text-black bg-white bg-opacity-10 backdrop-blur-md overflow-hidden rounded-xl border border-white border-opacity-20 p-3 focus:outline-none resize-none min-h-12 max-h-64 placeholder-blue-200"
+                className="placeholder:text-xs md:placeholder:text-sm text-xs md:text-sm w-full text-black bg-white bg-opacity-10 backdrop-blur-md overflow-hidden rounded-xl border border-white border-opacity-20 p-3 focus:outline-none resize-none min-h-12 max-h-64 placeholder-blue-200"
                 style={{
                   height: "48px",
                   transition: "height 0.2s ease",
@@ -519,13 +519,13 @@ export default function ChatPage() {
                       } flex items-center justify-center`}
                     >
                       <Globe
-                        className={`w-3 h-3 ${
+                        className={`w-2 h-2 md:w-3 md:h-3 ${
                           webSearchEnabled ? "text-yellow-500" : "text-gray-500"
                         }`}
                       />
                     </div>
                   </div>
-                  <div className="ml-2 text-black text-sm flex items-center">
+                  <div className="ml-2 text-black text-xs md:text-sm flex items-center">
                     Enable Web Search
                   </div>
                 </label>

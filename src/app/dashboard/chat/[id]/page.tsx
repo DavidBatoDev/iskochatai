@@ -548,7 +548,7 @@ export default function ChatPage() {
                     )}
                   </div>
                   {message.role === "assistant" ? (
-                    <div className="markdown-content items-center text-white whitespace-pre-wrap text-sm sm:text-base">
+                    <div className="markdown-content items-center text-white text-xs md:text-sm whitespace-pre-wrap sm:text-base">
                       <ReactMarkdown
                         components={{
                           h1: ({ node, ...props }) => (
@@ -629,7 +629,7 @@ export default function ChatPage() {
                       </ReactMarkdown>
                     </div>
                   ) : (
-                    <p className="text-black whitespace-pre-wrap text-sm sm:text-base">
+                    <p className="text-black whitespace-pre-wrap text-xs md:text-sm sm:text-base">
                       {message.content}
                     </p>
                   )}
@@ -768,7 +768,7 @@ export default function ChatPage() {
                   onChange={handleInputChange}
                   onKeyDown={handleKeyDown}
                   placeholder="Ask about scholarships, applications, deadlines..."
-                  className="w-full text-black bg-white bg-opacity-10 backdrop-blur-md overflow-hidden rounded-xl border border-white border-opacity-20 p-2 sm:p-3 focus:outline-none resize-none min-h-12 max-h-64 placeholder-blue-200 text-sm sm:text-base"
+                  className="placeholder:text-xs md:placeholder:text-sm text-xs md:text-sm w-full text-black bg-white bg-opacity-10 backdrop-blur-md overflow-hidden rounded-xl border border-white border-opacity-20 p-2 sm:p-3 focus:outline-none resize-none min-h-12 max-h-64 placeholder-blue-200 sm:text-base"
                   style={{
                     height: "48px",
                     transition: "height 0.2s ease",
