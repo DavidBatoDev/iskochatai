@@ -263,11 +263,21 @@ function isScholarshipQuery(query: string): boolean {
     "DOST",
     "CHED scholarship",
     "SM foundation",
+    "SM scholarship",
+    "SM",
     "ayala scholarship",
     "GSIS scholarship",
     "SSS loan",
     "metrobank scholarship",
     "education loan",
+    "branch",
+    "exam",
+    "coverage",
+    "test",
+    "scope",
+    "eligibility",
+    "subject",
+    "course"
   ];
 
   return scholarshipKeywords.some((keyword) =>
@@ -337,7 +347,11 @@ function isUniversityRelatedQuery(query: string): boolean {
     "dissertation",
     "accreditation",
     "CHED",
-    "Commission on Higher Education"
+    "Commission on Higher Education",
+    "exam",
+    "scope",
+    "coverage",
+    "type",
   ];
 
   return universityKeywords.some((keyword) =>

@@ -176,7 +176,7 @@ export async function semanticSearchScholarships(query, limit = 5) {
     const { data, error } = await supabase
       .rpc('match_scholarships', {
         query_embedding: queryEmbedding,
-        match_threshold: 0.5, // Adjust as needed
+        match_threshold: 0.3, // Adjust as needed
         match_count: limit
       });
     
