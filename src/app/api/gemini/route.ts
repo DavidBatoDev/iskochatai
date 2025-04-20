@@ -738,7 +738,7 @@ export async function POST(request: NextRequest) {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(geminiRequestBody),
-          signal: AbortSignal.timeout(10000),
+          signal: AbortSignal.timeout(30000),
         }
       );
 
