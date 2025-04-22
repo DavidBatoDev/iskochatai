@@ -202,7 +202,7 @@ function generateLocalResponse(
   userProfile?: UserProfile
 ): string {
   let response =
-    "I'm sorry, but I'm currently having trouble connecting to my knowledge services :() ";
+    "I'm sorry, but I'm currently having trouble connecting to my knowledge services :( ";
 
   if (isScholarshipQuery(query)) {
     response +=
@@ -232,7 +232,7 @@ function generateLocalResponse(
     }
   } else {
     response +=
-      "Please try asking your question again later when I'm reconnected to my services.";
+      `Please try asking your question again later when I'm reconnected to my services. ${GEMINI_API_KEY}`;
   }
 
   return response;
