@@ -1,5 +1,5 @@
 // app/api/gemini/route.ts
-export const runtime = 'edge';
+// export const runtime = 'edge';
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { scholarshipRAG } from "@/lib/rag/scholarshipRAG";
