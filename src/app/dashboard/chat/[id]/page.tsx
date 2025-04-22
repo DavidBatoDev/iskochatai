@@ -35,6 +35,11 @@ import { useAuthStore } from "@/lib/auth";
 import ChatSidebar from "@/components/ChatSidebar";
 import { useConversationsStore } from "@/lib/conversationStore";
 import { getAuthHeaders } from "@/lib/api";
+import ChatHeader from "@/components/chat-ui/ChatHeader";
+import {
+  ProfileAction,
+  SignOutAction,
+} from "@/components/chat-ui/HeaderActions";
 
 export default function ChatPage() {
   const params = useParams();
@@ -60,13 +65,14 @@ export default function ChatPage() {
     is_active: boolean;
   }
 
-  const { user, isAuthenticated, session } = useAuthStore();
+  const { user, isAuthenticated, session, signOut } = useAuthStore();
   const [sidebarOpen, setSidebarOpen] = useState(false); // Default closed on mobile
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isFetchingMessages, setIsFetchingMessages] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState<boolean>(false);
   const [webSearchEnabled, setWebSearchEnabled] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -86,12 +92,13 @@ export default function ChatPage() {
     handleResize();
 
     // Listen for window resize events
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   // Fetch messages for the current conversation
   useEffect(() => {
+    // Fetch messages only if conversationId is valid
     const fetchMessages = async () => {
       if (!conversationId || conversationId === "new") {
         // Reset to default welcome message for new conversations
@@ -254,6 +261,19 @@ export default function ChatPage() {
     }
   };
 
+  // Handle sign out
+  const handleSignOut = async () => {
+    setIsSigningOut(true);
+    try {
+      await signOut();
+      router.push("/signin");
+    } catch (error) {
+      console.error("Error signing out:", error);
+    } finally {
+      setIsSigningOut(false);
+    }
+  };
+
   // Auto-scroll to bottom of chat
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -409,9 +429,9 @@ export default function ChatPage() {
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [sidebarOpen]);
 
@@ -445,60 +465,23 @@ export default function ChatPage() {
         onClick={toggleSidebar}
         className="fixed top-4 left-4 z-30 bg-indigo-800 hover:bg-indigo-700 text-white p-2 rounded-lg shadow-md transition-all duration-300 md:hidden"
       >
-        {sidebarOpen ? (
-          <X className="w-5 h-5" />
-        ) : (
-          <Menu className="w-5 h-5" />
-        )}
+        {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
       </button>
 
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col w-full">
         {/* Header */}
-        <header className="bg-white bg-opacity-70 backdrop-blur-md shadow-md">
-          <div className="container mx-auto px-4 md:px-40 py-4 flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <Link href="/">
-                <Tooltip delayDuration={700}>
-                  <TooltipTrigger asChild>
-                    <button className="text-primary cursor-pointer hover:text-yellow-300 transition p-2 rounded-full hover:bg-white hover:bg-opacity-10">
-                      <ArrowLeft className="w-5 h-5" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent className="text-white bg-primary p-2 rounded-md shadow-lg">
-                    Back to Homepage
-                  </TooltipContent>
-                </Tooltip>
-              </Link>
-              <h1 className="text-xl font-bold text-primary flex items-center gap-2">
-                <Bot className="w-6 h-6 text-secondary" />
-                <div className="hidden xs:block">
-                  Isko<span className="text-secondary">Chat</span>Ai
-                </div>
-                <span className="text-xs bg-secondary text-indigo-900 px-2 py-1 rounded-full font-medium ml-2 flex items-center">
-                  <Sparkles className="w-3 h-3 mr-1" /> 
-                  <span className="hidden xs:inline">TechnoQuatro</span>
-                </span>
-              </h1>
-            </div>
-            <div className="flex items-center gap-3">
-              <Tooltip delayDuration={700}>
-                <TooltipTrigger asChild>
-                  <Link
-                    href="/profile"
-                    className="text-black cursor-pointer hover:text-yellow-300 transition p-2 rounded-full hover:bg-white hover:bg-opacity-10"
-                  >
-                    <UserCircle className="w-5 h-5" />
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent className="bg-white p-2 rounded-md shadow-lg">
-                  Profile
-                </TooltipContent>
-              </Tooltip>
-            </div>
-          </div>
-        </header>
-
+        <ChatHeader
+          className="px-4 md:px-40 py-4"
+          rightActions={[
+            <ProfileAction key="profile" />,
+            <SignOutAction
+              key="signout"
+              onClick={handleSignOut}
+              isLoading={isSigningOut}
+            />,
+          ]}
+        />
         {/* Chat Messages */}
         <div className="flex-1 overflow-y-auto px-2 sm:px-4 py-6 md:px-6">
           <div className="max-w-3xl mx-auto space-y-6">
@@ -685,17 +668,20 @@ export default function ChatPage() {
                 <div className="rounded-2xl max-w-[100%] px-2">
                   <div className="text-center mb-6">
                     <Bot className="w-12 h-12 sm:w-16 sm:h-16 text-yellow-400 mx-auto mb-4" />
-                    <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">Welcome to IskoBot AI</h2>
+                    <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">
+                      Welcome to IskoBot AI
+                    </h2>
                     <p className="text-blue-100 text-sm sm:text-base">
-                      Your AI assistant for scholarship and college application guidance
+                      Your AI assistant for scholarship and college application
+                      guidance
                     </p>
                   </div>
-                  
+
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
                     {suggestions.map((suggestion, index) => (
                       <button
                         key={index}
-                        className="cursor-pointer flex items-start p-3 sm:p-4 bg-indigo-800 bg-opacity-40 hover:bg-opacity-60 rounded-lg transition-all text-left"
+                        className="cursor-pointer flex items-start p-3 sm:p-4 bg-indigo-800 hover:bg-indigo-800/50 bg-opacity-40 rounded-lg  transition text-left"
                         onClick={() => {
                           setInput(suggestion.text);
                           if (textareaRef.current) {
@@ -703,8 +689,12 @@ export default function ChatPage() {
                           }
                         }}
                       >
-                        <div className="mr-2 sm:mr-3 mt-1">{suggestion.icon}</div>
-                        <p className="text-white text-xs sm:text-sm">{suggestion.text}</p>
+                        <div className="mr-2 sm:mr-3 mt-1">
+                          {suggestion.icon}
+                        </div>
+                        <p className="text-white text-xs sm:text-sm">
+                          {suggestion.text}
+                        </p>
                       </button>
                     ))}
                   </div>
@@ -815,7 +805,9 @@ export default function ChatPage() {
                       </div>
                       <div
                         className={`absolute left-1 top-1 bg-white w-3 h-3 sm:w-5 sm:h-5 rounded-full shadow-md transition transform ${
-                          webSearchEnabled ? "translate-x-5 sm:translate-x-7" : ""
+                          webSearchEnabled
+                            ? "translate-x-5 sm:translate-x-7"
+                            : ""
                         } flex items-center justify-center`}
                       >
                         <Globe
@@ -825,7 +817,7 @@ export default function ChatPage() {
                               : "text-gray-500"
                           }`}
                         />
-                        </div>
+                      </div>
                     </div>
                     <div className="ml-2 text-black text-xs sm:text-sm flex items-center">
                       Web Search
