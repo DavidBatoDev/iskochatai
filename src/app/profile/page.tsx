@@ -18,6 +18,9 @@ import {
 import { useRouter } from "next/navigation";
 import { useAuthStore, supabase } from "@/lib/auth";
 
+import { cn } from "@/lib/utils";
+import { AnimatedGridPattern } from "@/components/magicui/animated-grid-pattern";
+
 interface UserProfile {
   id: string;
   email: string;
@@ -226,7 +229,7 @@ const IskoProfilePage: React.FC = () => {
     const fetchProfile = async () => {
       if (!isAuthenticated || !user) {
         setIsLoading(false);
-        router.push("/signin");
+        // router.push("/signin");
         return;
       }
 
@@ -864,32 +867,32 @@ const IskoProfilePage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 to-indigo-800 flex items-center justify-center py-12 px-4">
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-blue-600 to-indigo-800 flex items-center justify-center py-12 px-4 ">
       {/* Toast notification */}
       {toast.show && (
         <Toast message={toast.message} type={toast.type} onClose={closeToast} />
       )}
 
-      {/* Grid background overlay */}
-      <div className="absolute inset-0 grid grid-cols-12 grid-rows-12 opacity-20 pointer-events-none">
-        {Array.from({ length: 12 }).map((_, i) => (
-          <React.Fragment key={`row-${i}`}>
-            {Array.from({ length: 12 }).map((_, j) => (
-              <div
-                key={`cell-${i}-${j}`}
-                className="border border-blue-300"
-              ></div>
-            ))}
-          </React.Fragment>
-        ))}
-      </div>
+      {/* Grid magicui */}
+      <AnimatedGridPattern
+        width={100}
+        height={100}
+        numSquares={20}
+        maxOpacity={0.5}
+        duration={3}
+        repeatDelay={1}
+        className={cn(
+          "[mask-image:radial-gradient(full_circle_at_center,white,transparent)]",
+          "inset-0 h-full w-full absolute"
+        )}
+      />
 
-      <div className="relative z-10 w-full max-w-4xl">
-        <div className="bg-white bg-opacity-95 rounded-2xl shadow-xl overflow-hidden">
+      <div className="relative z-10 w-full max-w-4xl ">
+        <div className="bg-white bg-opacity-95 rounded-2xl shadow-xl overflow-hidden border-2 border-indigo-500">
           {/* back button */}
           <button
             onClick={() => router.back()}
-            className="z-10 absolute top-4 left-4 flex items-center cursor-pointer text-white py-2 px-4 rounded-lg shadow-md"
+            className="z-10 absolute top-4 left-4 flex items-center cursor-pointer text-white py-2 px-4 rounded-lg shadow-lg hover:bg-indigo-500 hover:backdrop-blur-2xl transition-colors duration-200"
           >
             <ArrowLeft size={16} className="mr-2" />
             Back
