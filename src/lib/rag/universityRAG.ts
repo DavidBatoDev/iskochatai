@@ -131,7 +131,7 @@ export class UniversityRAG {
       `Contact Information: ${university.contact_info || ""}`,
       `Ranking: ${university.ranking || ""}`,
       `Accreditation: ${university.accreditation || ""}`,
-      `Extra Data: ${university.extra_data ? JSON.stringify(university.extra_data) : ""}` // Include extra data if available
+      `Additional Info Data: ${university.extra_data ? JSON.stringify(university.extra_data) : ""}` // Include extra data if available
     ];
     
     // Filter out empty parts and join with newlines

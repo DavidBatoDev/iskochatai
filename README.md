@@ -19,7 +19,6 @@ This chat application uses Google’s Gemini API, Supabase-powered RAG, and Goog
   - Integrated **vector search** using Supabase pgvector and in-memory store with multilingual embeddings for fast, semantically accurate retrieval of scholarship and university dat
 - 🌐 **Web Search Integration**: Custom Search JSON API to fetch the latest scholarship announcements.
 - 📋 **Profile Matching**: Personalize recommendations from user profiles stored in Supabase.
-- ⏱️ **Caching & Rate Limits**: 5‑minute revalidation for search and timeouts for API calls.
 
 ---
 
