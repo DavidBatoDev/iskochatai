@@ -481,15 +481,31 @@ const IskoProfilePage: React.FC = () => {
     }
   };
 
+  // Handle sign out with timeout
   const handleSignOut = async () => {
+    setIsSigningOut(true);
+    console.log("Signing out...");
+    
+    // Create a timeout that will force the loading state to end after 10 seconds
+    const timeoutId = setTimeout(() => {
+      alert("Sign out timeout reached (10s)");
+      setIsSigningOut(false);
+      window.location.reload();
+    }, 10000); // 10 seconds
+    
     try {
-      setIsSigningOut(true);
-      console.log("Signing out...");
+      // Try to sign out properly
       await signOut();
+      console.log("User signed out successfully");
+      
+      // If successful, clear the timeout and navigate
+      clearTimeout(timeoutId);
       router.push("/signin");
     } catch (error) {
-      console.error("Sign out error:", error);
+      console.error("Error signing out:", error);
       showToast("Failed to sign out. Please try again.", "error");
+      // If error occurs, also clear timeout and reset loading state
+      clearTimeout(timeoutId);
       setIsSigningOut(false);
     }
   };

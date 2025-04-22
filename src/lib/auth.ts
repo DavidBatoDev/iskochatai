@@ -154,7 +154,7 @@ export const useAuthStore = create<AuthState>()(
       signOut: async () => {
         try {
           set({ isLoading: true });
-          await supabase.auth.signOut();
+          await supabase.auth.signOut( {scope: 'local'});
           set({ user: null, session: null, isAuthenticated: false, isLoading: false });
         } catch (error) {
           set({ error: error instanceof Error ? error.message : 'An unknown error occurred' });

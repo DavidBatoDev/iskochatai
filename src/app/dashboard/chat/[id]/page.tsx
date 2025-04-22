@@ -78,6 +78,13 @@ export default function ChatPage() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { setCurrentConversationId } = useConversationsStore();
 
+  // // Check first if there is a valid user, session and authenticated
+  // useEffect(() => {
+  //   if (!isAuthenticated || !user || !session) {
+  //     router.push("/signin");
+  //   }
+  // }, [isAuthenticated, user, session, router]);
+
   // Responsive sidebar handling
   useEffect(() => {
     const handleResize = () => {
@@ -261,15 +268,31 @@ export default function ChatPage() {
     }
   };
 
-  // Handle sign out
+  // Handle sign out with timeout
   const handleSignOut = async () => {
     setIsSigningOut(true);
+    console.log("Signing out...");
+    
+    // Create a timeout that will force the loading state to end after 10 seconds
+    const timeoutId = setTimeout(() => {
+      alert("Sign out timeout reached (10s)");
+      setIsSigningOut(false);
+      window.location.reload();
+    }, 10000); // 10 seconds
+    
     try {
+      // Try to sign out properly
       await signOut();
+      console.log("User signed out successfully");
+      
+      // If successful, clear the timeout and navigate
+      clearTimeout(timeoutId);
       router.push("/signin");
     } catch (error) {
       console.error("Error signing out:", error);
-    } finally {
+      
+      // If error occurs, also clear timeout and reset loading state
+      clearTimeout(timeoutId);
       setIsSigningOut(false);
     }
   };
