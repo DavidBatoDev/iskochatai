@@ -202,7 +202,7 @@ function generateLocalResponse(
   userProfile?: UserProfile
 ): string {
   let response =
-    "I'm sorry, but I'm currently having trouble connecting to my knowledge services. ";
+    "I'm sorry, but I'm currently having trouble connecting to my knowledge services :() ";
 
   if (isScholarshipQuery(query)) {
     response +=
@@ -813,6 +813,7 @@ export async function POST(request: NextRequest) {
       });
     } catch (error: any) {
       console.error("Error with Gemini API, using fallback response:", error);
+      console.log("Latest user message:", latestUserMessage);
 
       const fallbackResponse = generateLocalResponse(
         latestUserMessage,
