@@ -167,9 +167,7 @@ async function getRecentMessages(
 }
 
 // Function to get user ID from request
-async function getUserIdFromRequest(
-  request: NextRequest
-): Promise<string | null> {
+async function getUserIdFromRequest(request: NextRequest): Promise<string | null> {
   try {
     const userId = request.headers.get("X-User-ID");
 
@@ -182,13 +180,14 @@ async function getUserIdFromRequest(
       const token = authHeader.substring(7);
       if (token && token !== "undefined" && token !== "null") {
         const { data, error } = await supabase.auth.getUser(token);
-
+        
         if (!error && data.user) {
           return data.user.id;
         }
       }
     }
-
+    
+    console.log("No authenticated user found in request");
     return null;
   } catch (error) {
     console.error("Error in getUserIdFromRequest:", error);
@@ -232,7 +231,7 @@ function generateLocalResponse(
     }
   } else {
     response +=
-      `Please try asking your question again later when I'm reconnected to my services. ${GEMINI_API_KEY}`;
+      `Please try asking your question again later when I'm reconnected to my services.`;
   }
 
   return response;
