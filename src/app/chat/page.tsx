@@ -19,6 +19,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import ChatHeader from "@/components/chat-ui/ChatHeader";
+import { ResetChatAction } from "@/components/chat-ui/HeaderActions";
 
 export default function ChatPage() {
   interface Reference {
@@ -202,49 +204,7 @@ export default function ChatPage() {
   return (
     <div className="flex flex-col h-screen bg-gradient-to-r from-blue-600 to-indigo-800">
       {/* Header */}
-      <header className="bg-white bg-opacity-70 backdrop-blur-md shadow-md">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <Link href="/">
-              <Tooltip delayDuration={700}>
-                <TooltipTrigger asChild>
-                  <button className="text-primary cursor-pointer hover:text-yellow-300 transition p-2 rounded-full hover:bg-white hover:bg-opacity-10">
-                    <ArrowLeft className="w-5 h-5" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent className="bg-primary p-2 rounded-md shadow-lg">
-                  Back to Home
-                </TooltipContent>
-              </Tooltip>
-            </Link>
-            <h1 className="text-xl font-bold text-primary flex items-center gap-2">
-              <Bot className="w-6 h-6 text-secondary" />
-              <div>
-                Isko<span className="text-secondary">Chat</span>Ai
-              </div>
-              <span className="hidden md:flex text-xs bg-secondary text-indigo-900 px-2 py-1 rounded-full font-medium ml-2 items-center">
-                <Sparkles className="w-3 h-3 mr-1" /> TechnoQuatro
-              </span>
-            </h1>
-          </div>
-          <div className="flex items-center gap-3 ">
-            <Tooltip delayDuration={700}>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={resetChat}
-                  className="text-black cursor-pointer hover:text-yellow-300 transition p-2 rounded-full hover:bg-white hover:bg-opacity-10"
-                >
-                  <RotateCcw className="w-5 h-5" />
-                </button>
-              </TooltipTrigger>
-
-              <TooltipContent className="bg-white p-2 rounded-md shadow-lg">
-                Reset Chat
-              </TooltipContent>
-            </Tooltip>
-          </div>
-        </div>
-      </header>
+      <ChatHeader rightActions={<ResetChatAction onClick={resetChat} />} className="px-4 py-4"/>
 
       {/* Chat Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-6">
