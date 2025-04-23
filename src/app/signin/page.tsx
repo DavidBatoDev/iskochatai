@@ -91,9 +91,13 @@ const Login: NextPage = () => {
                 />
               </svg>
             </div>
+            <Link
+              href={'/'}
+            >
             <h2 className="text-2xl sm:text-3xl font-extrabold text-white">
               IskoChat AI
             </h2>
+            </Link>
           </div>
         </div>
         <h2 className="mt-6 text-center text-2xl sm:text-3xl font-extrabold text-white">
