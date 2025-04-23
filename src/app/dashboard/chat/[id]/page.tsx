@@ -78,12 +78,12 @@ export default function ChatPage() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { setCurrentConversationId } = useConversationsStore();
 
-  // // Check first if there is a valid user, session and authenticated
-  // useEffect(() => {
-  //   if (!isAuthenticated || !user || !session) {
-  //     router.push("/signin");
-  //   }
-  // }, [isAuthenticated, user, session, router]);
+  // Check first if there is a valid user, session and authenticated
+  useEffect(() => {
+    if (!user || !session || !isAuthenticated) {
+      router.push("/signin");
+    }
+  }, []);
 
   // Responsive sidebar handling
   useEffect(() => {
@@ -193,7 +193,7 @@ export default function ChatPage() {
           // Navigate to the new conversation URL
           // router.push(`/dashboard/chat/${chatId}`);
           // Just update the URL without a full navigation reload
-          window.history.pushState({}, '', `/dashboard/chat/${chatId}`);
+          window.history.pushState({}, "", `/dashboard/chat/${chatId}`);
         } else {
           throw new Error(
             `Failed to create conversation: ${createResponse.status}`
@@ -221,7 +221,9 @@ export default function ChatPage() {
       // If this was a new conversation, update the state
       if (conversationId === "new") {
         // Update router without causing a navigation/reload
-        router.replace(`/dashboard/chat/${data.conversationId}`, { scroll: false });
+        router.replace(`/dashboard/chat/${data.conversationId}`, {
+          scroll: false,
+        });
       }
 
       const assistantMessage: Message = {
@@ -272,25 +274,25 @@ export default function ChatPage() {
   const handleSignOut = async () => {
     setIsSigningOut(true);
     console.log("Signing out...");
-    
+
     // Create a timeout that will force the loading state to end after 10 seconds
     const timeoutId = setTimeout(() => {
       alert("Sign out timeout reached (10s)");
       setIsSigningOut(false);
       window.location.reload();
     }, 10000); // 10 seconds
-    
+
     try {
       // Try to sign out properly
       await signOut();
       console.log("User signed out successfully");
-      
+
       // If successful, clear the timeout and navigate
       clearTimeout(timeoutId);
       router.push("/signin");
     } catch (error) {
       console.error("Error signing out:", error);
-      
+
       // If error occurs, also clear timeout and reset loading state
       clearTimeout(timeoutId);
       setIsSigningOut(false);
@@ -441,12 +443,14 @@ export default function ChatPage() {
     const handleClickOutside = (event: MouseEvent) => {
       if (window.innerWidth < 768 && sidebarOpen) {
         // Check if click was outside sidebar
-        const sidebar = document.getElementById('chat-sidebar');
-        const toggleButton = document.getElementById('sidebar-toggle');
-        if (sidebar && 
-            !sidebar.contains(event.target as Node) && 
-            toggleButton && 
-            !toggleButton.contains(event.target as Node)) {
+        const sidebar = document.getElementById("chat-sidebar");
+        const toggleButton = document.getElementById("sidebar-toggle");
+        if (
+          sidebar &&
+          !sidebar.contains(event.target as Node) &&
+          toggleButton &&
+          !toggleButton.contains(event.target as Node)
+        ) {
           setSidebarOpen(false);
         }
       }
@@ -462,7 +466,7 @@ export default function ChatPage() {
     <div className="flex h-screen bg-gradient-to-r from-blue-600 to-indigo-800 overflow-hidden">
       {/* Sidebar Overlay - only visible on mobile when sidebar is open */}
       {sidebarOpen && window.innerWidth < 768 && (
-        <div 
+        <div
           className="fixed inset-0 bg-black opacity-50 z-10"
           onClick={() => setSidebarOpen(false)}
         />
@@ -519,171 +523,175 @@ export default function ChatPage() {
             )}
 
             {/* Messages list */}
-            {!isFetchingMessages && messages.length > 0 && messages.map((message, index) => (
-              <div
-                key={index}
-                className={`flex ${
-                  message.role === "user" ? "justify-end" : "justify-start"
-                }`}
-              >
+            {!isFetchingMessages &&
+              messages.length > 0 &&
+              messages.map((message, index) => (
                 <div
-                  className={`max-w-[95%] sm:max-w-[85%] md:max-w-[80%] rounded-2xl p-3 sm:p-4 shadow-md ${
-                    message.role === "user"
-                      ? "bg-white text-black rounded-br-none"
-                      : "bg-blue-500 bg-opacity-10 backdrop-blur-md text-black rounded-bl-none border border-white border-opacity-20"
+                  key={index}
+                  className={`flex ${
+                    message.role === "user" ? "justify-end" : "justify-start"
                   }`}
                 >
-                  <div className="flex items-center gap-2 mb-2">
-                    {message.role === "user" ? (
-                      <>
-                        <span className="font-semibold text-black">You</span>
-                        <User className="w-4 h-4 text-black" />
-                      </>
-                    ) : (
-                      <>
-                        <Bot className="w-4 h-4 text-yellow-400" />
-                        <span className="font-semibold text-white">
-                          IskoBot
-                        </span>
-                        {message.usedSearch && (
-                          <span className="flex items-center gap-1 text-xs bg-green-500 text-black px-2 py-0.5 rounded-full">
-                            <Globe className="w-3 h-3" /> Web Search
+                  <div
+                    className={`max-w-[95%] sm:max-w-[85%] md:max-w-[80%] rounded-2xl p-3 sm:p-4 shadow-md ${
+                      message.role === "user"
+                        ? "bg-white text-black rounded-br-none"
+                        : "bg-blue-500 bg-opacity-10 backdrop-blur-md text-black rounded-bl-none border border-white border-opacity-20"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      {message.role === "user" ? (
+                        <>
+                          <span className="font-semibold text-black">You</span>
+                          <User className="w-4 h-4 text-black" />
+                        </>
+                      ) : (
+                        <>
+                          <Bot className="w-4 h-4 text-yellow-400" />
+                          <span className="font-semibold text-white">
+                            IskoBot
                           </span>
-                        )}
-                      </>
-                    )}
-                  </div>
-                  {message.role === "assistant" ? (
-                    <div className="markdown-content items-center text-white text-xs md:text-sm whitespace-pre-wrap sm:text-base">
-                      <ReactMarkdown
-                        components={{
-                          h1: ({ node, ...props }) => (
-                            <h1
-                              className="text-xl font-bold mt-[-40px]"
-                              {...props}
-                            />
-                          ),
-                          h2: ({ node, ...props }) => (
-                            <h2
-                              className="text-lg font-bold mt-[-40px]"
-                              {...props}
-                            />
-                          ),
-                          h3: ({ node, ...props }) => (
-                            <h3
-                              className="text-md font-bold mt-[-20px]"
-                              {...props}
-                            />
-                          ),
-                          p: ({ node, ...props }) => (
-                            <p className="mb-[-10px]" {...props} />
-                          ),
-                          ol: ({ node, ...props }) => (
-                            <ol
-                              className="list-decimal pl-5 items-center"
-                              {...props}
-                            />
-                          ),
-                          ul: ({ node, ...props }) => (
-                            <ul
-                              className="list-disc pl-5 items-start"
-                              {...props}
-                            />
-                          ),
-                          li: ({ node, ...props }) => (
-                            <li
-                              className="align-baseline mt-[-20px]"
-                              {...props}
-                            />
-                          ),
-                          a: ({ node, ...props }) => (
-                            <a
-                              target="_blank"
-                              className="text-yellow-300 hover:underline"
-                              {...props}
-                            />
-                          ),
-                          blockquote: ({ node, ...props }) => (
-                            <blockquote
-                              className="border-l-4 border-yellow-400 pl-3 italic my-2"
-                              {...props}
-                            />
-                          ),
-                          code: ({
-                            node,
-                            inline,
-                            ...props
-                          }: {
-                            node?: any;
-                            inline?: boolean;
-                            [key: string]: any;
-                          }) =>
-                            inline ? (
-                              <code
-                                className="bg-indigo-900 bg-opacity-50 text-white px-1 rounded"
-                                {...props}
-                              />
-                            ) : (
-                              <code
-                                className="block bg-indigo-900 bg-opacity-50 text-white p-2 rounded my-2 overflow-x-auto text-xs sm:text-sm"
+                          {message.usedSearch && (
+                            <span className="flex items-center gap-1 text-xs bg-green-500 text-black px-2 py-0.5 rounded-full">
+                              <Globe className="w-3 h-3" /> Web Search
+                            </span>
+                          )}
+                        </>
+                      )}
+                    </div>
+                    {message.role === "assistant" ? (
+                      <div className="markdown-content items-center text-white text-xs md:text-sm whitespace-pre-wrap sm:text-base">
+                        <ReactMarkdown
+                          components={{
+                            h1: ({ node, ...props }) => (
+                              <h1
+                                className="text-xl font-bold mt-[-40px]"
                                 {...props}
                               />
                             ),
-                        }}
-                      >
-                        {message.content}
-                      </ReactMarkdown>
-                    </div>
-                  ) : (
-                    <p className="text-black whitespace-pre-wrap text-xs md:text-sm sm:text-base">
-                      {message.content}
-                    </p>
-                  )}
-
-                  {/* References Section */}
-                  {message.role === "assistant" &&
-                    message.usedSearch &&
-                    message.references &&
-                    message.references.length > 0 && (
-                      <div className="mt-4 pt-3 border-t border-white border-opacity-20">
-                        <h4 className="text-sm font-semibold text-secondary mb-2 flex items-center">
-                          <Search className="w-3 h-3 mr-1 text-secondary" />{" "}
-                          References
-                        </h4>
-                        <ul className="space-y-2">
-                          {message.references.map((reference, idx) => (
-                            <li
-                              key={idx}
-                              className="text-xs text-black break-words"
-                            >
+                            h2: ({ node, ...props }) => (
+                              <h2
+                                className="text-lg font-bold mt-[-40px]"
+                                {...props}
+                              />
+                            ),
+                            h3: ({ node, ...props }) => (
+                              <h3
+                                className="text-md font-bold mt-[-20px]"
+                                {...props}
+                              />
+                            ),
+                            p: ({ node, ...props }) => (
+                              <p className="mb-[-10px]" {...props} />
+                            ),
+                            ol: ({ node, ...props }) => (
+                              <ol
+                                className="list-decimal pl-5 items-center"
+                                {...props}
+                              />
+                            ),
+                            ul: ({ node, ...props }) => (
+                              <ul
+                                className="list-disc pl-5 items-start"
+                                {...props}
+                              />
+                            ),
+                            li: ({ node, ...props }) => (
+                              <li
+                                className="align-baseline mt-[-20px]"
+                                {...props}
+                              />
+                            ),
+                            a: ({ node, ...props }) => (
                               <a
-                                href={reference.url}
                                 target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-start text-blue-200 hover:text-yellow-300 transition-colors"
-                              >
-                                <ExternalLink className="w-3 h-3 mr-1 mt-0.5 flex-shrink-0" />
-                                <span>{reference.title || reference.url}</span>
-                              </a>
-                            </li>
-                          ))}
-                        </ul>
+                                className="text-yellow-300 hover:underline"
+                                {...props}
+                              />
+                            ),
+                            blockquote: ({ node, ...props }) => (
+                              <blockquote
+                                className="border-l-4 border-yellow-400 pl-3 italic my-2"
+                                {...props}
+                              />
+                            ),
+                            code: ({
+                              node,
+                              inline,
+                              ...props
+                            }: {
+                              node?: any;
+                              inline?: boolean;
+                              [key: string]: any;
+                            }) =>
+                              inline ? (
+                                <code
+                                  className="bg-indigo-900 bg-opacity-50 text-white px-1 rounded"
+                                  {...props}
+                                />
+                              ) : (
+                                <code
+                                  className="block bg-indigo-900 bg-opacity-50 text-white p-2 rounded my-2 overflow-x-auto text-xs sm:text-sm"
+                                  {...props}
+                                />
+                              ),
+                          }}
+                        >
+                          {message.content}
+                        </ReactMarkdown>
                       </div>
+                    ) : (
+                      <p className="text-black whitespace-pre-wrap text-xs md:text-sm sm:text-base">
+                        {message.content}
+                      </p>
                     )}
 
-                  {message.role === "assistant" && (
-                    <button
-                      className="text-blue-200 hover:text-yellow-300 mt-10 text-xs flex items-center gap-1 transition-colors cursor-pointer"
-                      onClick={() =>
-                        navigator.clipboard.writeText(message.content)
-                      }
-                    >
-                      <Copy className="w-3 h-3" /> Copy
-                    </button>
-                  )}
+                    {/* References Section */}
+                    {message.role === "assistant" &&
+                      message.usedSearch &&
+                      message.references &&
+                      message.references.length > 0 && (
+                        <div className="mt-4 pt-3 border-t border-white border-opacity-20">
+                          <h4 className="text-sm font-semibold text-secondary mb-2 flex items-center">
+                            <Search className="w-3 h-3 mr-1 text-secondary" />{" "}
+                            References
+                          </h4>
+                          <ul className="space-y-2">
+                            {message.references.map((reference, idx) => (
+                              <li
+                                key={idx}
+                                className="text-xs text-black break-words"
+                              >
+                                <a
+                                  href={reference.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-start text-blue-200 hover:text-yellow-300 transition-colors"
+                                >
+                                  <ExternalLink className="w-3 h-3 mr-1 mt-0.5 flex-shrink-0" />
+                                  <span>
+                                    {reference.title || reference.url}
+                                  </span>
+                                </a>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                    {message.role === "assistant" && (
+                      <button
+                        className="text-blue-200 hover:text-yellow-300 mt-10 text-xs flex items-center gap-1 transition-colors cursor-pointer"
+                        onClick={() =>
+                          navigator.clipboard.writeText(message.content)
+                        }
+                      >
+                        <Copy className="w-3 h-3" /> Copy
+                      </button>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
 
             {/* Empty chat placeholder with suggestions */}
             {!isFetchingMessages && messages.length === 0 && (
@@ -723,7 +731,8 @@ export default function ChatPage() {
                   </div>
 
                   <p className="text-center text-xs text-blue-200 mt-4 sm:mt-6">
-                    You can ask any questions about scholarships, college applications, or educational opportunities
+                    You can ask any questions about scholarships, college
+                    applications, or educational opportunities
                   </p>
                 </div>
               </div>
