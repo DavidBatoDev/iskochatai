@@ -1,3 +1,4 @@
+// auth.ts
 import { createClient } from '@supabase/supabase-js';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
