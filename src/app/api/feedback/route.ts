@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { supabase } from "@/lib/supabase";
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,11 +14,30 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Simulate saving the feedback (e.g., to a database)
-    console.log("Feedback received:", { name, email, rating, feedback });
+    // Store feedback in Supabase
+    const { data, error } = await supabase.from("feedbacks").insert([
+      {
+        name,
+        email,
+        rating,
+        feedback: feedback,
+        created_at: new Date().toISOString(),
+      },
+    ]);
+
+    if (error) {
+      console.error("Error storing feedback in Supabase:", error);
+      return NextResponse.json(
+        { error: "Failed to save feedback" },
+        { status: 500 }
+      );
+    }
 
     // Respond with success
-    return NextResponse.json({ message: "Feedback submitted successfully" });
+    return NextResponse.json({
+      message: "Feedback submitted successfully",
+      data,
+    });
   } catch (error) {
     console.error("Error handling feedback submission:", error);
     return NextResponse.json(
